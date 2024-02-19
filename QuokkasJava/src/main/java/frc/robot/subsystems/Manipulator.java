@@ -30,7 +30,7 @@ public class Manipulator extends SubsystemBase {
   public static final double kARM_START_POS = 0.376; // start config
   public static final double kARM_AMP_POS = 0.325; // amp scoring
 
-  private final PIDController armController = new PIDController(-15.0, 0, 0);
+  private final PIDController armController = new PIDController(15.0, 0, 0);
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight);
