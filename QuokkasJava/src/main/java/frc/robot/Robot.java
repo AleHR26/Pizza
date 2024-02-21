@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,6 +17,8 @@ import frc.robot.autonomous.MultiNote;
 import frc.robot.autonomous.SendIt;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
 public class Robot extends TimedRobot {
 
@@ -37,6 +41,26 @@ public class Robot extends TimedRobot {
   private MultiNote multinote;
   private SendIt sendit;
 
+  PhotonCamera camera;
+
+  // PID constants should be tuned per robot
+  final double LINEAR_P = 0.9;
+  final double LINEAR_D = 0.1;
+  PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
+
+  final double ANGULAR_P = 0.8;
+  final double ANGULAR_D = 0.2;
+  PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
+
+  // Constants such as camera and target height stored. Change per robot and goal!
+  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20);
+  static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+  // Angle between horizontal and the camera.
+  static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+
+  // How far from the target we want to be
+  static final double GOAL_RANGE_METERS = Units.feetToMeters(1.5);
+
   @Override
   public void robotInit() {
     drive = Drive.getInstance();
@@ -51,6 +75,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Auto Modes", m_chooser);
 
     ps5 = new Joystick(0);
+    camera = new PhotonCamera("Camera");
   }
 
   @Override
@@ -100,10 +125,41 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // Drive
-    double power = -ps5.getRawAxis(1); // 1 -- Left Y Axis
-    double steering = -ps5.getRawAxis(2); // 2 -- Right X Axis
+    double forwardSpeed;
+    double rotationSpeed;
 
-    drive.move(power, steering);
+    if (ps5.getRawButton(1)) {
+      // Vision-alignment mode
+      // Query the latest result from PhotonVision
+      var result = camera.getLatestResult();
+
+      if (result.hasTargets()) {
+        // First calculate range
+        double range =
+            PhotonUtils.calculateDistanceToTargetMeters(
+                CAMERA_HEIGHT_METERS,
+                TARGET_HEIGHT_METERS,
+                CAMERA_PITCH_RADIANS,
+                Units.degreesToRadians(result.getBestTarget().getPitch()));
+
+        // Use this range as the measurement we give to the PID controller.
+        // -1.0 required to ensure positive PID controller effort _increases_ range
+        forwardSpeed = forwardController.calculate(range, GOAL_RANGE_METERS);
+
+        // Also calculate angular power
+        // -1.0 required to ensure positive PID controller effort _increases_ yaw
+        rotationSpeed = turnController.calculate(result.getBestTarget().getYaw(), 0);
+      } else {
+        // If we have no targets, stay still.
+        forwardSpeed = 0;
+        rotationSpeed = 0;
+      }
+    } else {
+      // Manual Driver Mode
+      forwardSpeed = -ps5.getRawAxis(1);
+      rotationSpeed = -ps5.getRawAxis(2);
+      drive.move(forwardSpeed, rotationSpeed);
+    }
 
     // Intake
     if (ps5.getRawButton(6) && manipulator.getNoteSensor()) {
