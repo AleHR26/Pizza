@@ -56,7 +56,7 @@ public class Manipulator extends SubsystemBase {
 
   /* See Manipulator::kARM_FLOOR_POS etc. */
   public void armToPos(double pos) {
-    double power = armController.calculate(armEnc.get(), pos);
+    double power = -armController.calculate(armEnc.get(), pos);
     moveArm(power);
   }
 
