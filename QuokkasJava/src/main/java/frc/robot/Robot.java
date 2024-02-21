@@ -101,7 +101,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     // Drive
     double power = -ps5.getRawAxis(1); // 1 -- Left Y Axis
-    double steering = ps5.getRawAxis(2); // 2 -- Right X Axis
+    double steering = -ps5.getRawAxis(2); // 2 -- Right X Axis
 
     drive.move(power, steering);
 

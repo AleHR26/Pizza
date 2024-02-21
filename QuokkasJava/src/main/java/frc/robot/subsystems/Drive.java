@@ -22,7 +22,9 @@ public class Drive extends SubsystemBase {
     R2.follow(R1);
 
     L1.setInverted(true);
+    L2.setInverted(true);
     R1.setInverted(false);
+    R2.setInverted(false);
 
     drivetrain = new DifferentialDrive(L1, R1);
   }

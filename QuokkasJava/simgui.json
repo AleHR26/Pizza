@@ -21,6 +21,16 @@
           "open": true
         }
       },
+      "SPARK MAX [5]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [6]": {
+        "header": {
+          "open": true
+        }
+      },
       "Victor SPX[1]": {
         "header": {
           "open": true
@@ -99,6 +109,9 @@
     }
   },
   "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
     "Connections": {
       "open": true
     },
