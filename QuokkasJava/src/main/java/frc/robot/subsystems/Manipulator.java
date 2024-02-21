@@ -37,9 +37,9 @@ public class Manipulator extends SubsystemBase {
     shooterMotorB.follow(shooterMotorA);
 
     intakeMotor.setIdleMode(IdleMode.kBrake);
-    intakeMotor.setIdleMode(IdleMode.kBrake);
+    armMotorLeft.setIdleMode(IdleMode.kBrake);
     armMotorLeft.setOpenLoopRampRate(0.25);
-    intakeMotor.setIdleMode(IdleMode.kBrake);
+    armMotorRight.setIdleMode(IdleMode.kBrake);
     armMotorRight.setOpenLoopRampRate(0.25);
   }
 
