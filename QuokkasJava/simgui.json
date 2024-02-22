@@ -6,31 +6,6 @@
           "open": true
         }
       },
-      "SPARK MAX [2]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [3]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [4]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [5]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [6]": {
-        "header": {
-          "open": true
-        }
-      },
       "Victor SPX[1]": {
         "header": {
           "open": true
@@ -60,6 +35,11 @@
         "header": {
           "open": true
         }
+      },
+      "navX-Sensor[0]": {
+        "header": {
+          "open": true
+        }
       }
     }
   },
@@ -78,6 +58,14 @@
     }
   },
   "NetworkTables": {
+    "retained": {
+      "SmartDashboard": {
+        "Auto Modes": {
+          "open": true
+        },
+        "open": true
+      }
+    },
     "transitory": {
       "FMSInfo": {
         "open": true
