@@ -12,12 +12,12 @@ public class Constants {
   public static class PhotonVisionConstants {
     // Constants such as camera and target height stored. Change per robot and goal!
     static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20);
-    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(1);
     // Angle between horizontal and the camera.
-    static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+    static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(180);
 
     // How far from the target we want to be
-    static final double GOAL_RANGE_METERS = Units.feetToMeters(1.5);
+    static final double GOAL_RANGE_METERS = Units.feetToMeters(1.6);
   }
 
   public static class DrivetrainConstants {
