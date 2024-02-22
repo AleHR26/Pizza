@@ -20,7 +20,7 @@ public class Drive extends SubsystemBase {
   public Drive() {
     L2.follow(L1);
     R2.follow(R1);
-    
+
     L1.setSmartCurrentLimit(60);
     L2.setSmartCurrentLimit(60);
     R1.setSmartCurrentLimit(60);
