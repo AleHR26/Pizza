@@ -93,3 +93,4 @@ public class Manipulator extends SubsystemBase {
     return noteSensor.get();
   }
 }
+

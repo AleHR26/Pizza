@@ -89,6 +89,9 @@
         "open": true
       },
       "photonvision": {
+        "Camera": {
+          "open": true
+        },
         "Photoncam1": {
           "open": true
         },

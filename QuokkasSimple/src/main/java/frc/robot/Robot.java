@@ -355,7 +355,7 @@ public class Robot extends TimedRobot {
     if (m_manipController.getRawButton(6) && manipulator.getNoteSensor()) {
       // If pressing intake button, and the NOTE is not in the intake
       manipulator.intake(0.375);
-      if (m_manipController.getRawAxis(3) < 0.5) {
+      if (m_manipController.getRawAxis(8) < 0.5) {
         this.curr_arm_target = Manipulator.kARM_FLOOR_POS;
       }
     } else if (m_manipController.getRawButton(5)) {
@@ -403,14 +403,6 @@ public class Robot extends TimedRobot {
     if (m_manipController.getRawButton(8)) {
       // Amp scoring config
       this.curr_arm_target = Manipulator.kARM_AMP_POS;
-    }
-
-    /*
-     * While the button is being held spin both motors to intake note
-     */
-    if (m_manipController.getRawButton(7)) {
-      // No longer intaking; raise intake to avoid damage
-      this.curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
     if (m_manipController.getPOV(0) == 0) {

@@ -4,8 +4,13 @@
 
 package frc.robot;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -22,10 +27,13 @@ public class Robot extends TimedRobot {
   private final String kAutoNameDefault = "Default";
   private final String kAutoNameCustom = "My Auto";
   private String m_autoSelected;
-  private Joystick ps5;
+  private PS4Controller m_manipController;
+  private PS4Controller m_driveController;
   private Timer autoTimer;
   private double lastTimestamp; // Add this line for missing variable
+  
 
+  PhotonCamera camera;
   /* Mechanisms */
   private Drive drive;
   private Manipulator manipulator; // Change variable name to match your class name
@@ -36,6 +44,31 @@ public class Robot extends TimedRobot {
   private Basic basic;
   private MultiNote multinote;
   private SendIt sendit;
+  
+  // Constants such as camera and target height stored. Change per robot and goal.
+  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); //TODO: Change Photon constants to Margarita
+  static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+  
+  /**  
+   * Angle between horizontal and the camera.
+   */
+  static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+
+  /**  
+   * How far from the target we want to be
+   */
+  static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
+
+  // PID constants should be tuned per robot
+  //TODO: Tune the PID.
+  final double LINEAR_P = 10;
+  final double LINEAR_D = 8;
+  PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
+
+  final double ANGULAR_P = 10;
+  final double ANGULAR_D = 8;
+  PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
+  
 
   @Override
   public void robotInit() {
@@ -49,8 +82,11 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("SendIt", "SendIt");
 
     SmartDashboard.putData("Auto Modes", m_chooser);
+    
+    m_driveController = new PS4Controller(0);
+    m_manipController = new PS4Controller(1);
 
-    ps5 = new Joystick(0);
+    camera = new PhotonCamera("Camera");
   }
 
   @Override
@@ -100,19 +136,55 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     // Drive
-    double power = -ps5.getRawAxis(1); // 1 -- Left Y Axis
-    double steering = -ps5.getRawAxis(2); // 2 -- Right X Axis
+    double power; 
+    double steering; 
 
+        if (m_driveController.getSquareButton()) {
+            // Vision-alignment mode
+            // Query the latest result from PhotonVision
+            var result = camera.getLatestResult();
+            
+
+            if (result.hasTargets()) {
+                // First calculate range
+                double range =
+                        PhotonUtils.calculateDistanceToTargetMeters( 
+                                CAMERA_HEIGHT_METERS, 
+                                TARGET_HEIGHT_METERS,
+                                CAMERA_PITCH_RADIANS, 
+                                Units.degreesToRadians(result.getBestTarget().getPitch()));
+               
+
+                // Use this range as the measurement we give to the PID controller.
+                // -1.0 required to ensure positive PID controller effort _increases_ range
+
+                power = -forwardController.calculate(range, GOAL_RANGE_METERS);
+
+                // Also calculate angular power
+                // -1.0 required to ensure positive PID controller effort _increases_ yaw
+                steering = turnController.calculate(result.getBestTarget().getYaw(), 0);
+            } else {
+                // If we have no targets, stay still.
+                power = 0;
+                steering = 0;
+            }
+        } else {
+            // Manual Driver Mode
+            power = -m_driveController.getLeftY();
+            steering = -m_driveController.getRightX();
+           
+        }
+    
     drive.move(power, steering);
 
     // Intake
-    if (ps5.getRawButton(6) && manipulator.getNoteSensor()) {
+    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
       // If pressing intake button, and the NOTE is not in the intake
       manipulator.intake(0.375);
-      if (ps5.getRawAxis(3) < 0.5) {
+      if (m_manipController.getR2Axis() < 0.5) {
         this.curr_arm_target = Manipulator.kARM_FLOOR_POS;
       }
-    } else if (ps5.getRawButton(5)) {
+    } else if (m_manipController.getL1Button()) {
       // Outtake
       manipulator.shoot(-0.25);
     } else {
@@ -121,20 +193,20 @@ public class Robot extends TimedRobot {
       manipulator.shoot(0.0);
     }
 
-    if (ps5.getRawButton(6) && manipulator.getNoteSensor()) {
+    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
       // If pressing intake and NOTE is in the intake
-      ps5.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
     } else {
-      ps5.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
     }
 
-    if (ps5.getRawButtonReleased(6)) {
+    if (m_manipController.getR1ButtonReleased()) {
       // No longer intaking; raise intake to avoid damage
       this.curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
-    // Shooter
-    if (ps5.getRawAxis(3) > 0.1) { // Replace Hand.kRight with the trigger axis (3)
+    /* Shooter */
+    if (m_manipController.getR2Axis() > 0.1) { 
       if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
         // If arm turned back farther than starting config
         manipulator.shoot(0.25);
@@ -146,6 +218,9 @@ public class Robot extends TimedRobot {
         // double ty = table->GetNumber("ty", 0.0);
         // double shot_angle = -0.00008 * pow(ty,2) + .00252*ty + .4992;
         // this->curr_arm_target = shot_angle;
+
+        //double shotAngle = getShotAngleFromPhotonVision();
+        //manip.getInstance().setCurrArmTarget(shotAngle);
       }
       /*vision aiming
        * NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -156,7 +231,7 @@ public class Robot extends TimedRobot {
       */
     }
 
-    if (ps5.getRawAxis(3) > 0.5) {
+    if (m_manipController.getR2Axis() > 0.5) {
       if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
         // If arm turned back farther than starting config, score AMP
         manipulator.intake(1.0);
@@ -164,10 +239,10 @@ public class Robot extends TimedRobot {
       } else {
         // High goal shooting
         // Adjustable by driver. 50% press => 0% power, 100% press => 100% power
-        manipulator.shoot((ps5.getRawAxis(3) - 0.5) * 2);
+        manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
 
-      if (ps5.getRawButton(6)) {
+      if (m_manipController.getR1Button()) {
         // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
       }
@@ -176,15 +251,16 @@ public class Robot extends TimedRobot {
     }
 
     // Arm manual control
-    if (ps5.getRawButtonPressed(4)) {
-      // Amp scoring config
-      this.curr_arm_target = Manipulator.kARM_AMP_POS;
-    }
+  if (m_manipController.getTriangleButtonPressed()) {
+    // Amp scoring config
+    this.curr_arm_target = Manipulator.kARM_AMP_POS;
+  }
 
-    if (ps5.getPOV(0) == 0) {
+
+    if (m_manipController.getPOV(0) == 0) {
       manipulator.moveArm(0.5); // Up
       this.curr_arm_target = manipulator.getArmEnc();
-    } else if (ps5.getPOV(0) == 180) {
+    } else if (m_manipController.getPOV(0) == 180) {
       manipulator.moveArm(-0.5); // Down
       this.curr_arm_target = manipulator.getArmEnc();
     } else {
@@ -194,16 +270,4 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
   }
-
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void testInit() {}
-
-  @Override
-  public void testPeriodic() {}
 }
