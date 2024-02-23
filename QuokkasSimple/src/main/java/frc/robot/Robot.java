@@ -400,7 +400,7 @@ public class Robot extends TimedRobot {
 
 
     // Arm manual control
-    if (m_manipController.getRawButtonPressed(4)) {
+    if (m_manipController.getRawButton(8)) {
       // Amp scoring config
       this.curr_arm_target = Manipulator.kARM_AMP_POS;
     }
@@ -408,7 +408,7 @@ public class Robot extends TimedRobot {
     /*
      * While the button is being held spin both motors to intake note
      */
-    if (m_manipController.getRawButtonReleased(6)) {
+    if (m_manipController.getRawButton(7)) {
       // No longer intaking; raise intake to avoid damage
       this.curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
