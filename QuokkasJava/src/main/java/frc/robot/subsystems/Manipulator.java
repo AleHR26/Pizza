@@ -9,13 +9,13 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Manipulator extends SubsystemBase {
   private static Manipulator instance;
 
-  private Encoder armEnc = new Encoder(1, 2);
+  private DutyCycleEncoder armEnc = new DutyCycleEncoder(1);
   private CANSparkMax armMotorLeft = new CANSparkMax(5, MotorType.kBrushless);
   private CANSparkMax armMotorRight = new CANSparkMax(6, MotorType.kBrushless);
 
