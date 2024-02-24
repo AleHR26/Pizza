@@ -76,7 +76,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    this.curr_arm_target = Manipulator.kARM_START_POS;
+    this.curr_arm_target = manipulator.getArmEnc();
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
     m_chooser.addOption("Basic", "Basic");
@@ -133,13 +133,18 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    manipulator.getArmEnc();
+    
+  }
 
   @Override
   public void teleopPeriodic() {
     // Drive
     double power; 
     double steering; 
+
+   
   
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
@@ -173,13 +178,20 @@ public class Robot extends TimedRobot {
       }
     } else {
         // Manual Driver Mode
-        power = -m_driveController.getLeftY();
-        steering = -m_driveController.getRightX();
-        
+        power = -m_driveController.getLeftY() *0.7;
+        steering = -m_driveController.getRightX() *0.7;
+
+        if (Math.abs(steering)< 0.1) {
+          steering = 0; 
+       }
+       if (Math.abs(power)< 0.1) { 
+        power = 0;
+       } 
     }
     
     drive.move(power, steering);
-
+    
+    /* 
     // Intake
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
       // If pressing intake button, and the NOTE is not in the intake
@@ -208,7 +220,7 @@ public class Robot extends TimedRobot {
       this.curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
-    /* Shooter */
+    //Shooter 
     if (m_manipController.getR2Axis() > 0.1) { 
       if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
         // If arm turned back farther than starting config
@@ -230,8 +242,8 @@ public class Robot extends TimedRobot {
          double tx = table.getEntry("tx").getDouble(0.0);
          double Kp = 0.05;
          drive.move(power, Kp * tx);
-         SmartDashboard.putNumber("tx", tx);
-      */
+         SmartDashboard.putNumber("tx", tx); 
+      
     }
 
     if (m_manipController.getR2Axis() > 0.5) {
@@ -259,6 +271,8 @@ public class Robot extends TimedRobot {
     this.curr_arm_target = Manipulator.kARM_AMP_POS;
   }
 
+  */
+
 
     if (m_manipController.getPOV(0) == 0) {
       manipulator.moveArm(0.5); // Up
@@ -272,5 +286,6 @@ public class Robot extends TimedRobot {
     }
 
     SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
+    
   }
 }

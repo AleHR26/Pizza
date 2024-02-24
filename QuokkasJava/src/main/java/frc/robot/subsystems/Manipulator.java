@@ -29,12 +29,13 @@ public class Manipulator extends SubsystemBase {
   public static final double kARM_FENDER_POS = 0.53; // close shot
   public static final double kARM_START_POS = 0.376; // start config
   public static final double kARM_AMP_POS = 0.325; // amp scoring
+  
 
   private final PIDController armController = new PIDController(15.0, 0, 0);
 
   private Manipulator() {
-    armMotorLeft.follow(armMotorRight);
-    shooterMotorB.follow(shooterMotorA);
+    armMotorLeft.follow(armMotorRight, true);
+    shooterMotorB.follow(shooterMotorA, true);
 
     intakeMotor.setSmartCurrentLimit(20);
     armMotorRight.setSmartCurrentLimit(60);
