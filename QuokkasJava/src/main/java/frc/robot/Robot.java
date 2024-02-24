@@ -6,7 +6,9 @@ package frc.robot;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -34,6 +36,7 @@ public class Robot extends TimedRobot {
   
 
   PhotonCamera camera;
+  PhotonTrackedTarget target;
   /* Mechanisms */
   private Drive drive;
   private Manipulator manipulator; // Change variable name to match your class name
@@ -138,14 +141,17 @@ public class Robot extends TimedRobot {
     // Drive
     double power; 
     double steering; 
+  
 
         if (m_driveController.getSquareButton()) {
             // Vision-alignment mode
             // Query the latest result from PhotonVision
             var result = camera.getLatestResult();
+            int targetID = target.getFiducialId();
+          
             
 
-            if (result.hasTargets()) {
+            if (result.hasTargets() && targetID == 4) {
                 // First calculate range
                 double range =
                         PhotonUtils.calculateDistanceToTargetMeters( 
