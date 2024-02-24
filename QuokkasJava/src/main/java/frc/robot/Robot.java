@@ -76,7 +76,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    this.curr_arm_target = manipulator.getArmEnc();
+    this.curr_arm_target = manipulator.getArmEnc(); //TODO: CONFIGURE THE POSITIONS FOR THE ENCODER (Manipulator.kARM_START_POS)
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
     m_chooser.addOption("Basic", "Basic");
