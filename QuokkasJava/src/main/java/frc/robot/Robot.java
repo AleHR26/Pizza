@@ -141,44 +141,42 @@ public class Robot extends TimedRobot {
     double power; 
     double steering; 
   
-
-        if (m_driveController.getSquareButton()) {
-            // Vision-alignment mode
-            // Query the latest result from PhotonVision
-            var result = camera.getLatestResult();
-            int targetID = target.getFiducialId();
+    // If square pressed, aligns
+    if (m_driveController.getSquareButton()) {
+      // Vision-alignment mode
+      // Query the latest result from PhotonVision
+      var result = camera.getLatestResult();
+      int targetID = target.getFiducialId();
+      
+      if (result.hasTargets() && targetID == 4) {
+          // First calculate range
+          double range =
+                  PhotonUtils.calculateDistanceToTargetMeters( 
+                          CAMERA_HEIGHT_METERS, 
+                          TARGET_HEIGHT_METERS,
+                          CAMERA_PITCH_RADIANS, 
+                          Units.degreesToRadians(result.getBestTarget().getPitch()));
           
-            
 
-            if (result.hasTargets() && targetID == 4) {
-                // First calculate range
-                double range =
-                        PhotonUtils.calculateDistanceToTargetMeters( 
-                                CAMERA_HEIGHT_METERS, 
-                                TARGET_HEIGHT_METERS,
-                                CAMERA_PITCH_RADIANS, 
-                                Units.degreesToRadians(result.getBestTarget().getPitch()));
-               
+          // Use this range as the measurement we give to the PID controller.
+          // -1.0 required to ensure positive PID controller effort _increases_ range
 
-                // Use this range as the measurement we give to the PID controller.
-                // -1.0 required to ensure positive PID controller effort _increases_ range
+        power = -forwardController.calculate(range, GOAL_RANGE_METERS);
 
-                power = -forwardController.calculate(range, GOAL_RANGE_METERS);
-
-                // Also calculate angular power
-                // -1.0 required to ensure positive PID controller effort _increases_ yaw
-                steering = turnController.calculate(result.getBestTarget().getYaw(), 0);
-            } else {
-                // If we have no targets, stay still.
-                power = 0;
-                steering = 0;
-            }
-        } else {
-            // Manual Driver Mode
-            power = -m_driveController.getLeftY();
-            steering = -m_driveController.getRightX();
-           
-        }
+        // Also calculate angular power
+        // -1.0 required to ensure positive PID controller effort _increases_ yaw
+        steering = turnController.calculate(result.getBestTarget().getYaw(), 0);
+      } else {
+        // If we have no targets, stay still.
+        power = 0;
+        steering = 0;
+      }
+    } else {
+        // Manual Driver Mode
+        power = -m_driveController.getLeftY();
+        steering = -m_driveController.getRightX();
+        
+    }
     
     drive.move(power, steering);
 

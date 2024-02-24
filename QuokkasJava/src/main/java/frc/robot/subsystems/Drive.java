@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drive extends SubsystemBase {
+  // Crates motor objects
   private CANSparkMax L1 = new CANSparkMax(1, MotorType.kBrushless);
   private CANSparkMax L2 = new CANSparkMax(2, MotorType.kBrushless);
   private CANSparkMax R1 = new CANSparkMax(3, MotorType.kBrushless);
@@ -18,19 +19,24 @@ public class Drive extends SubsystemBase {
 
   // Singleton pattern
   public Drive() {
+
+    // Makes one motor follow the other
     L2.follow(L1);
     R2.follow(R1);
 
+    // Controls current to motors
     L1.setSmartCurrentLimit(60);
     L2.setSmartCurrentLimit(60);
     R1.setSmartCurrentLimit(60);
     R2.setSmartCurrentLimit(60);
 
+    // Sets motors to inverted
     L1.setInverted(true);
     L2.setInverted(true);
     R1.setInverted(false);
     R2.setInverted(false);
 
+    // Creates differential drive
     drivetrain = new DifferentialDrive(L1, R1);
   }
 
@@ -42,10 +48,12 @@ public class Drive extends SubsystemBase {
     return DriveHolder.INSTANCE;
   }
 
+  // Resets gyro
   public void zeroGyro() {
     navx.zeroYaw();
   }
 
+  // Calculates power to the motors
   public void move(double power, double steering) {
     double lPower = power - steering;
     double rPower = power + steering;
@@ -57,6 +65,7 @@ public class Drive extends SubsystemBase {
     R2.set(rPower);
   }
 
+  // Drive with the gyro
   public void gyroDrive(double maxSpeed, double heading) {
     double Kp = 0.015;
     double error = heading - navx.getAngle();
