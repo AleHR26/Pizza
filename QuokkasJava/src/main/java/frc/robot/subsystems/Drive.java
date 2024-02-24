@@ -50,8 +50,8 @@ public class Drive extends SubsystemBase {
     double lPower = power - steering;
     double rPower = power + steering;
 
-    L1.set(-lPower);
-    L2.set(-lPower);
+    L1.set(lPower);
+    L2.set(lPower);
 
     R1.set(rPower);
     R2.set(rPower);
