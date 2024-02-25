@@ -4,14 +4,10 @@
 
 package frc.robot;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonTrackedTarget;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -21,6 +17,9 @@ import frc.robot.autonomous.MultiNote;
 import frc.robot.autonomous.SendIt;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
 
@@ -28,11 +27,10 @@ public class Robot extends TimedRobot {
   private final String kAutoNameDefault = "Default";
   private final String kAutoNameCustom = "My Auto";
   private String m_autoSelected;
-  private PS4Controller m_manipController;
-  private PS4Controller m_driveController;
+  private PS5Controller m_manipController;
+  private PS5Controller m_driveController;
   private Timer autoTimer;
   private double lastTimestamp; // Add this line for missing variable
-  
 
   PhotonCamera camera;
   PhotonTrackedTarget target;
@@ -46,23 +44,19 @@ public class Robot extends TimedRobot {
   private Basic basic;
   private MultiNote multinote;
   private SendIt sendit;
-  
+
   // Constants such as camera and target height stored. Change per robot and goal.
-  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); //TODO: Change Photon constants to Margarita
+  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); // TODO: Change Photon constants to Margarita
   static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
-  
-  /**  
-   * Angle between horizontal and the camera.
-   */
+
+  /** Angle between horizontal and the camera. */
   static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
 
-  /**  
-   * How far from the target we want to be
-   */
+  /** How far from the target we want to be */
   static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
 
   // PID constants should be tuned per robot
-  //TODO: Tune the PID.
+  // TODO: Tune the PID.
   final double LINEAR_P = 10;
   final double LINEAR_D = 8;
   PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
@@ -70,13 +64,13 @@ public class Robot extends TimedRobot {
   final double ANGULAR_P = 10;
   final double ANGULAR_D = 8;
   PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
-  
 
   @Override
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    this.curr_arm_target = manipulator.getArmEnc(); //TODO: CONFIGURE THE POSITIONS FOR THE ENCODER (Manipulator.kARM_START_POS)
+    curr_arm_target = Manipulator.kARM_START_POS; // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
+    // (manipulator.get())
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
     m_chooser.addOption("Basic", "Basic");
@@ -84,9 +78,9 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("SendIt", "SendIt");
 
     SmartDashboard.putData("Auto Modes", m_chooser);
-    
-    m_driveController = new PS4Controller(0);
-    m_manipController = new PS4Controller(1);
+
+    m_driveController = new PS5Controller(0);
+    m_manipController = new PS5Controller(1);
 
     camera = new PhotonCamera("Camera");
   }
@@ -109,9 +103,9 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
 
-    this.basic = new Basic();
-    this.multinote = new MultiNote();
-    this.sendit = new SendIt();
+    basic = new Basic();
+    multinote = new MultiNote();
+    sendit = new SendIt();
   }
 
   @Override
@@ -134,158 +128,130 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    manipulator.getArmEnc();
     
   }
 
   @Override
   public void teleopPeriodic() {
     // Drive
-    double power; 
-    double steering; 
+    double power;
+    double steering;
 
-   
-  
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
       // Vision-alignment mode
       // Query the latest result from PhotonVision
       var result = camera.getLatestResult();
+      // Put the ID you want to follow or prioritize
       int targetID = target.getFiducialId();
-      
+
       if (result.hasTargets() && targetID == 4) {
-          // First calculate range
-          double range =
-                  PhotonUtils.calculateDistanceToTargetMeters( 
-                          CAMERA_HEIGHT_METERS, 
-                          TARGET_HEIGHT_METERS,
-                          CAMERA_PITCH_RADIANS, 
-                          Units.degreesToRadians(result.getBestTarget().getPitch()));
-          
+        // First calculate range
+        double range =
+            PhotonUtils.calculateDistanceToTargetMeters(
+                CAMERA_HEIGHT_METERS,
+                TARGET_HEIGHT_METERS,
+                CAMERA_PITCH_RADIANS,
+                Units.degreesToRadians(result.getBestTarget().getPitch()));
 
-          // Use this range as the measurement we give to the PID controller.
-          // -1.0 required to ensure positive PID controller effort _increases_ range
+        // Use this range as the measurement we give to the PID controller.
+        // -1.0 required to ensure positive PID controller effort _increases_ range
 
-        power = -forwardController.calculate(range, GOAL_RANGE_METERS);
+        power = forwardController.calculate(range, GOAL_RANGE_METERS); //TODO: Change positive or negative by trying
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort _increases_ yaw
-        steering = turnController.calculate(result.getBestTarget().getYaw(), 0);
+        steering = turnController.calculate(result.getBestTarget().getYaw(), 0); //TODO: Change positive or negative by trying
       } else {
         // If we have no targets, stay still.
         power = 0;
         steering = 0;
       }
     } else {
-        // Manual Driver Mode
-        power = -m_driveController.getLeftY() *0.7;
-        steering = -m_driveController.getRightX() *0.7;
+      // Manual Driver Mode
+      power = -m_driveController.getLeftY() * 0.7;
+      steering = -m_driveController.getRightX() * 0.7;
 
-        if (Math.abs(steering)< 0.1) {
-          steering = 0; 
-       }
-       if (Math.abs(power)< 0.1) { 
+      if (Math.abs(steering) < 0.1) {
+        steering = 0;
+      }
+      if (Math.abs(power) < 0.1) {
         power = 0;
-       } 
-    }
-    
+      }
+    } 
+
     drive.move(power, steering);
+
     
-    /* 
-    // Intake
-    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
-      // If pressing intake button, and the NOTE is not in the intake
-      manipulator.intake(0.375);
-      if (m_manipController.getR2Axis() < 0.5) {
-        this.curr_arm_target = Manipulator.kARM_FLOOR_POS;
-      }
-    } else if (m_manipController.getL1Button()) {
-      // Outtake
-      manipulator.shoot(-0.25);
-    } else {
-      // Do nothing
-      manipulator.intake(0.0);
-      manipulator.shoot(0.0);
-    }
-
-    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
-      // If pressing intake and NOTE is in the intake
-      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
-    } else {
-      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
-    }
-
-    if (m_manipController.getR1ButtonReleased()) {
-      // No longer intaking; raise intake to avoid damage
-      this.curr_arm_target = Manipulator.kARM_FENDER_POS;
-    }
-
-    //Shooter 
-    if (m_manipController.getR2Axis() > 0.1) { 
-      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
-        // If arm turned back farther than starting config
-        manipulator.shoot(0.25);
+      /* Intake */ 
+      if (m_manipController.getR1Button() && manipulator.getNoteSensor()) { 
+          manipulator.intake(0.375);
+          if (m_manipController.getR2Axis() < 0.5) { 
+              curr_arm_target = Manipulator.kARM_FLOOR_POS;
+          }
+      } else if (m_manipController.getL1Button()) {  
+          manipulator.intake(-1.0);
+          manipulator.shoot(-0.25);
       } else {
-        // High goal shooting
-        // Set shot angle
-        // std::shared_ptr<nt::NetworkTable> table =
-        // nt::NetworkTableInstance::GetDefault().GetTable("limelight");
-        // double ty = table->GetNumber("ty", 0.0);
-        // double shot_angle = -0.00008 * pow(ty,2) + .00252*ty + .4992;
-        // this->curr_arm_target = shot_angle;
-
-        //double shotAngle = getShotAngleFromPhotonVision();
-        //manip.getInstance().setCurrArmTarget(shotAngle);
+          manipulator.intake(0.0);
+          manipulator.shoot(0.0);
       }
-      /*vision aiming
-       * NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-         double tx = table.getEntry("tx").getDouble(0.0);
-         double Kp = 0.05;
-         drive.move(power, Kp * tx);
-         SmartDashboard.putNumber("tx", tx); 
-      
-    }
 
-    if (m_manipController.getR2Axis() > 0.5) {
-      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
-        // If arm turned back farther than starting config, score AMP
-        manipulator.intake(1.0);
-        manipulator.shoot(0.5);
+      if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {  
+          m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
       } else {
-        // High goal shooting
-        // Adjustable by driver. 50% press => 0% power, 100% press => 100% power
-        manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
+          m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
       }
 
-      if (m_manipController.getR1Button()) {
-        // Run intake despite NOTE being in intake
-        manipulator.intake(1.0);
+      if (m_manipController.getR1ButtonReleased()) { 
+          curr_arm_target = Manipulator.kARM_FENDER_POS;
       }
-    } else {
-      manipulator.shoot(0.0);
-    }
 
-    // Arm manual control
-  if (m_manipController.getTriangleButtonPressed()) {
-    // Amp scoring config
-    this.curr_arm_target = Manipulator.kARM_AMP_POS;
-  }
+      /* Shooter */
+      if (m_manipController.getR2Axis() > 0.1) {  
+          if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+              manipulator.shoot(0.25);
+          } else {
+              //NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+              //double tx = table.getEntry("tx").getDouble(0.0);
+              //double Kp = 0.05;
+              //drive.move(power, Kp * tx);
+              //SmartDashboard.putNumber("tx", tx);
+          }
+      }
 
-  */
+      if (m_manipController.getR2Axis() > 0.5) {  
+          if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+              manipulator.intake(1.0);
+              manipulator.shoot(0.5);
+          } else {
+              manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
+          }
 
+          if (m_manipController.getR1Button()) {  
+              manipulator.intake(1.0);
+          }
+      } else {
+          manipulator.shoot(0.0);
+      }
 
-    if (m_manipController.getPOV(0) == 0) {
-      manipulator.moveArm(0.5); // Up
-      this.curr_arm_target = manipulator.getArmEnc();
-    } else if (m_manipController.getPOV(0) == 180) {
-      manipulator.moveArm(-0.5); // Down
-      this.curr_arm_target = manipulator.getArmEnc();
-    } else {
-      // Move arm to preset target, or current position if last command was manual control.
-      manipulator.armToPos(curr_arm_target);
-    }
+       /*Arm manual control*/
+      if (m_manipController.getTriangleButtonPressed()) {  
+          curr_arm_target = Manipulator.kARM_AMP_POS;
+      }
 
-    SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
-    
+      if (m_manipController.getPOV(0) == 0) {
+          manipulator.moveArm(0.1);  // Up
+          curr_arm_target = manipulator.getArmEnc();
+      } else if (m_manipController.getPOV(0) == 180) {
+          manipulator.moveArm(-0.1); // Down
+          curr_arm_target = manipulator.getArmEnc();
+      } else {
+          manipulator.armToPos(curr_arm_target);
+      }
+
+      SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
   }
 }
+
+

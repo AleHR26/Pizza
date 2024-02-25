@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,19 +23,15 @@ public class Manipulator extends SubsystemBase {
 
   private DigitalInput noteSensor = new DigitalInput(0);
   private CANSparkMax intakeMotor = new CANSparkMax(9, MotorType.kBrushless);
-  
-  //TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
+
+  // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
   public static final double kARM_FLOOR_POS = 0.584; // intaking
   public static final double kARM_FENDER_POS = 0.53; // close shot
   public static final double kARM_START_POS = 0.376; // start config
   public static final double kARM_AMP_POS = 0.325; // amp scoring
-  
-
-  private final PIDController armController = new PIDController(15.0, 0, 0);
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
-    shooterMotorB.follow(shooterMotorA, true);
 
     intakeMotor.setSmartCurrentLimit(20);
     armMotorRight.setSmartCurrentLimit(60);
@@ -52,24 +47,24 @@ public class Manipulator extends SubsystemBase {
   }
 
   public static Manipulator getInstance() {
-    if (instance == null) {
-      instance = new Manipulator();
-    }
+    instance = new Manipulator();
     return instance;
   }
 
   public double getArmEnc() {
-    return armEnc.get();
+    return armEnc.getAbsolutePosition();
   }
 
   /* See Manipulator::kARM_FLOOR_POS etc. */
   public void armToPos(double pos) {
-    double power = -armController.calculate(armEnc.get(), pos);
+    double Kp = -15.0;
+    double error = pos - armEnc.getAbsolutePosition();
+    double power = Kp * error;
     moveArm(power);
   }
 
   public void moveArm(double power) {
-    final double maxPower = 0.5;
+    final double maxPower = 0.1;
 
     // Stop from making too much torque
     if (power > maxPower) {
