@@ -32,6 +32,7 @@ public class Manipulator extends SubsystemBase {
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
+    //shooterMotorB.follow(shooterMotorA);
 
     intakeMotor.setSmartCurrentLimit(20);
     armMotorRight.setSmartCurrentLimit(60);
