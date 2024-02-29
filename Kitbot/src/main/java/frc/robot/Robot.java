@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -50,6 +51,8 @@ public class Robot extends TimedRobot {
    * A class provided to control your drivetrain. Different drive styles can be passed to differential drive:
    * https://github.com/wpilibsuite/allwpilib/blob/main/wpilibj/src/main/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.java
    */
+  MotorControllerGroup left;
+  MotorControllerGroup right;
   DifferentialDrive m_drivetrain;
 
   /*
@@ -209,10 +212,9 @@ public class Robot extends TimedRobot {
      */
 
     
-
-    leftRear.follow(leftFront);
-    rightFront.follow(rightRear);
-
+    left = new MotorControllerGroup(leftFront, leftRear);
+    right = new MotorControllerGroup(rightFront, rightRear);
+    
     leftRear.setInverted(false);
     leftFront.setInverted(false);
     rightFront.setInverted(true);
@@ -220,7 +222,7 @@ public class Robot extends TimedRobot {
 
     
 
-    m_drivetrain = new DifferentialDrive(leftFront, rightRear);
+    m_drivetrain = new DifferentialDrive(left, right);
 
     /*
      * Launcher wheel(s) spinning the wrong direction? Change to true here.
@@ -424,7 +426,6 @@ public class Robot extends TimedRobot {
             }
         } else {
             // Manual Driver Mode
-            forwardSpeed = 0.7;
             forwardSpeed = -m_driverController.getRawAxis(1);
             rotationSpeed = -m_driverController.getRawAxis(2);
            
