@@ -7,7 +7,6 @@ package frc.robot;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -285,15 +284,6 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
 
-    leftRear.set(.5);
-    leftFront.set(.5);
-    rightFront.set(1);
-    rightRear.set(1); 
-    leftFront.setNeutralMode(NeutralMode.Brake);
-    leftRear.setNeutralMode(NeutralMode.Brake);
-    rightFront.setNeutralMode(NeutralMode.Brake);
-    rightRear.setNeutralMode(NeutralMode.Brake);
-
     AUTO_LAUNCH_DELAY_S = 2;
     AUTO_DRIVE_DELAY_S = 3;
 
@@ -378,15 +368,7 @@ public class Robot extends TimedRobot {
      *
      * This setting is driver preference. Try setting the idle modes below to kBrake to see the difference.
      */
-    leftRear.set(.5);
-    leftFront.set(.5);
-    rightFront.set(1);
-    rightRear.set(1); 
-    
-    leftFront.setNeutralMode(NeutralMode.Brake);
-    leftRear.setNeutralMode(NeutralMode.Brake);
-    rightFront.setNeutralMode(NeutralMode.Brake);
-    rightRear.setNeutralMode(NeutralMode.Brake);
+  
   }
 
   /** This function is called periodically during operator control. */
@@ -426,8 +408,8 @@ public class Robot extends TimedRobot {
             }
         } else {
             // Manual Driver Mode
-            forwardSpeed = -m_driverController.getRawAxis(1);
-            rotationSpeed = -m_driverController.getRawAxis(2);
+            forwardSpeed = -m_driverController.getRawAxis(1)*0.7;
+            rotationSpeed = -m_driverController.getRawAxis(2)*0.7;
            
           }
     
