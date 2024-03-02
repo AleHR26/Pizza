@@ -408,9 +408,13 @@ public class Robot extends TimedRobot {
             }
         } else {
             // Manual Driver Mode
+            if (m_manipController.getRawButton(4)){
+              forwardSpeed = -m_driverController.getRawAxis(1)*0.4;
+              rotationSpeed = -m_driverController.getRawAxis(2)*0.4;
+            } else {
             forwardSpeed = -m_driverController.getRawAxis(1)*0.7;
             rotationSpeed = -m_driverController.getRawAxis(2)*0.7;
-           
+            }
           }
     
 
