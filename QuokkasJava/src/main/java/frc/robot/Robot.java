@@ -172,8 +172,8 @@ public class Robot extends TimedRobot {
       }
     } else {
       // Manual Driver Mode
-      power = -m_driveController.getLeftY() * 0.7;
-      steering = -m_driveController.getRightX() * 0.7;
+      power = -m_driveController.getRightX() * 0.7;
+      steering = -m_driveController.getLeftY() * 0.7;
 
       if (Math.abs(steering) < 0.1) {
         steering = 0;
