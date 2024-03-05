@@ -128,7 +128,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    Manipulator.noteSensor.setAutomaticMode(true);
+  }
 
   @Override
   public void teleopPeriodic() {
