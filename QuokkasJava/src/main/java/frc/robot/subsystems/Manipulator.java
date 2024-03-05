@@ -25,10 +25,10 @@ public class Manipulator extends SubsystemBase {
   private CANSparkMax intakeMotor = new CANSparkMax(9, MotorType.kBrushless);
 
   // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
-  public static final double kARM_FLOOR_POS = 0.584; // intaking
-  public static final double kARM_FENDER_POS = 0.53; // close shot
-  public static final double kARM_START_POS = 0.376; // start config
-  public static final double kARM_AMP_POS = 0.325; // amp scoring
+  public static final double kARM_FLOOR_POS = 0.17; // intaking (Before: 0.584)
+  public static final double kARM_FENDER_POS = 0.222; // close shot (Before: 0.53)
+  public static final double kARM_START_POS = 0.376; // start config (Before: 0.376)
+  public static final double kARM_AMP_POS = 0.427; // amp scoring (Before: 0.325)
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
