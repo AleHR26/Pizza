@@ -46,7 +46,8 @@ public class Robot extends TimedRobot {
   private SendIt sendit;
 
   // Constants such as camera and target height stored. Change per robot and goal.
-  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); // TODO: Change Photon constants to Margarita
+  static final double CAMERA_HEIGHT_METERS =
+      Units.inchesToMeters(20); // TODO: Change Photon constants to Margarita
   static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
 
   /** Angle between horizontal and the camera. */
@@ -127,9 +128,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {
-    
-  }
+  public void teleopInit() {}
 
   @Override
   public void teleopPeriodic() {
@@ -157,11 +156,15 @@ public class Robot extends TimedRobot {
         // Use this range as the measurement we give to the PID controller.
         // -1.0 required to ensure positive PID controller effort _increases_ range
 
-        power = forwardController.calculate(range, GOAL_RANGE_METERS); //TODO: Change positive or negative by trying
+        power =
+            forwardController.calculate(
+                range, GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort _increases_ yaw
-        steering = turnController.calculate(result.getBestTarget().getYaw(), 0); //TODO: Change positive or negative by trying
+        steering =
+            turnController.calculate(
+                result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
       } else {
         // If we have no targets, stay still.
         power = 0;
@@ -178,80 +181,77 @@ public class Robot extends TimedRobot {
       if (Math.abs(power) < 0.1) {
         power = 0;
       }
-    } 
+    }
 
     drive.move(power, steering);
 
-    
-      /* Intake */ 
-      if (m_manipController.getR1Button() && manipulator.getNoteSensor()) { 
-          manipulator.intake(0.375);
-          if (m_manipController.getR2Axis() < 0.5) { 
-              curr_arm_target = Manipulator.kARM_FLOOR_POS;
-          }
-      } else if (m_manipController.getL1Button()) {  
-          manipulator.intake(-1.0);
-          manipulator.shoot(-0.25);
+    /* Intake */
+    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
+      manipulator.intake(0.375);
+      if (m_manipController.getR2Axis() < 0.5) {
+        curr_arm_target = Manipulator.kARM_FLOOR_POS;
+      }
+    } else if (m_manipController.getL1Button()) {
+      manipulator.intake(-1.0);
+      manipulator.shoot(-0.25);
+    } else {
+      manipulator.intake(0.0);
+      manipulator.shoot(0.0);
+    }
+
+    if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
+      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+    } else {
+      m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+    }
+
+    if (m_manipController.getR1ButtonReleased()) {
+      curr_arm_target = Manipulator.kARM_FENDER_POS;
+    }
+
+    /* Shooter */
+    if (m_manipController.getR2Axis() > 0.1) {
+      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+        manipulator.shoot(0.25);
       } else {
-          manipulator.intake(0.0);
-          manipulator.shoot(0.0);
+        // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+        // double tx = table.getEntry("tx").getDouble(0.0);
+        // double Kp = 0.05;
+        // drive.move(power, Kp * tx);
+        // SmartDashboard.putNumber("tx", tx);
       }
+    }
 
-      if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {  
-          m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+    if (m_manipController.getR2Axis() > 0.5) {
+      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+        manipulator.intake(1.0);
+        manipulator.shoot(0.5);
       } else {
-          m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+        manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
 
-      if (m_manipController.getR1ButtonReleased()) { 
-          curr_arm_target = Manipulator.kARM_FENDER_POS;
+      if (m_manipController.getR1Button()) {
+        manipulator.intake(1.0);
       }
+    } else {
+      manipulator.shoot(0.0);
+    }
 
-      /* Shooter */
-      if (m_manipController.getR2Axis() > 0.1) {  
-          if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
-              manipulator.shoot(0.25);
-          } else {
-              //NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-              //double tx = table.getEntry("tx").getDouble(0.0);
-              //double Kp = 0.05;
-              //drive.move(power, Kp * tx);
-              //SmartDashboard.putNumber("tx", tx);
-          }
-      }
+    /*Arm manual control*/
+    if (m_manipController.getTriangleButtonPressed()) {
+      curr_arm_target = Manipulator.kARM_AMP_POS;
+    }
 
-      if (m_manipController.getR2Axis() > 0.5) {  
-          if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
-              manipulator.intake(1.0);
-              manipulator.shoot(0.5);
-          } else {
-              manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
-          }
+    if (m_manipController.getPOV(0) == 0) {
+      manipulator.moveArm(0.1); // Up
+      curr_arm_target = manipulator.getArmEnc();
+    } else if (m_manipController.getPOV(0) == 180) {
+      manipulator.moveArm(-0.1); // Down
+      curr_arm_target = manipulator.getArmEnc();
+    } else {
+      manipulator.armToPos(curr_arm_target);
+    }
 
-          if (m_manipController.getR1Button()) {  
-              manipulator.intake(1.0);
-          }
-      } else {
-          manipulator.shoot(0.0);
-      }
-
-       /*Arm manual control*/
-      if (m_manipController.getTriangleButtonPressed()) {  
-          curr_arm_target = Manipulator.kARM_AMP_POS;
-      }
-
-      if (m_manipController.getPOV(0) == 0) {
-          manipulator.moveArm(0.1);  // Up
-          curr_arm_target = manipulator.getArmEnc();
-      } else if (m_manipController.getPOV(0) == 180) {
-          manipulator.moveArm(-0.1); // Down
-          curr_arm_target = manipulator.getArmEnc();
-      } else {
-          manipulator.armToPos(curr_arm_target);
-      }
-
-      SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
+    SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
   }
 }
-
-
