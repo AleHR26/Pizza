@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Auto Modes", m_chooser);
 
     m_driveController = new PS5Controller(0);
-    m_manipController = new PS5Controller(1);
+    m_manipController = new PS5Controller(0);
 
     camera = new PhotonCamera("Camera");
   }
@@ -129,7 +129,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    Manipulator.noteSensor.setAutomaticMode(true);
+   
   }
 
   @Override
@@ -174,8 +174,8 @@ public class Robot extends TimedRobot {
       }
     } else {
       // Manual Driver Mode
-      power = -m_driveController.getRightX() * 0.7;
-      steering = -m_driveController.getLeftY() * 0.7;
+      power = m_driveController.getRightX() * 0.7;
+      steering = m_driveController.getLeftY() * 0.7;
 
       if (Math.abs(steering) < 0.1) {
         steering = 0;
@@ -189,33 +189,45 @@ public class Robot extends TimedRobot {
 
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
+      //If pressing intake button, and the NOTE is not int the intake
       manipulator.intake(0.375);
       if (m_manipController.getR2Axis() < 0.5) {
         curr_arm_target = Manipulator.kARM_FLOOR_POS;
       }
     } else if (m_manipController.getL1Button()) {
+      //Outtake
       manipulator.intake(-1.0);
       manipulator.shoot(-0.25);
     } else {
+      //do nothing
       manipulator.intake(0.0);
       manipulator.shoot(0.0);
     }
 
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
+      //If pressing the intake and NOTE is in the intake
       m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
     } else {
       m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
     }
 
     if (m_manipController.getR1ButtonReleased()) {
+      //No longer intaking, raise intake to avaoid damage
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
     /* Shooter */
     if (m_manipController.getR2Axis() > 0.1) {
-      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
+        //if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
+        /** 
+         * High goal shooting
+         *  Set shot angle
+         */ 
+
+
         // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
         // double tx = table.getEntry("tx").getDouble(0.0);
         // double Kp = 0.05;
@@ -224,36 +236,54 @@ public class Robot extends TimedRobot {
       }
     }
 
+    /* Vision aiming section */
+    if (m_manipController.getL2Axis() > 0.1) {
+        manipulator.intake(1.0);
+    }
+
+    
     if (m_manipController.getR2Axis() > 0.5) {
-      if (manipulator.getArmEnc() < Manipulator.kARM_START_POS) {
+      //if arm turned back farther than starting config, score AMP
+      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         manipulator.intake(1.0);
         manipulator.shoot(0.5);
       } else {
+        // High goal shooting
         manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
 
       if (m_manipController.getR1Button()) {
+        //Run intake despite NOTE being in intake
         manipulator.intake(1.0);
       }
     } else {
+      //DO nothing
       manipulator.shoot(0.0);
     }
 
     /*Arm manual control*/
     if (m_manipController.getTriangleButtonPressed()) {
+      //Amp stating config
       curr_arm_target = Manipulator.kARM_AMP_POS;
     }
-
+ 
     if (m_manipController.getPOV(0) == 0) {
-      manipulator.moveArm(0.1); // Up
+      manipulator.moveArm(0.3); // Up
       curr_arm_target = manipulator.getArmEnc();
     } else if (m_manipController.getPOV(0) == 180) {
-      manipulator.moveArm(-0.1); // Down
+      manipulator.moveArm(-0.3); // Down
       curr_arm_target = manipulator.getArmEnc();
     } else {
       manipulator.armToPos(curr_arm_target);
     }
 
-    SmartDashboard.putNumber("Arm", manipulator.getArmEnc());
+    SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
+    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange()); 
+    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle()); 
+    SmartDashboard.putNumber("L1-Motor Voltage", drive.getL1());
+    SmartDashboard.putNumber("L1-Motor Voltage", drive.getL2());
+    SmartDashboard.putNumber("L1-Motor Voltage", drive.getR1());
+    SmartDashboard.putNumber("L1-Motor Voltage", drive.getR2());
+    
   }
 }

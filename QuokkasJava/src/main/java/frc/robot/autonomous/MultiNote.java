@@ -30,7 +30,7 @@ public class MultiNote extends Command {
     if (Util.wait(st, 2.0)) {
       // Lower arm
       manipulator.shoot(0.5);
-      manipulator.armToPos(0.545);
+      manipulator.armToPos(0.25);
     } else if (Util.wait(st, 4.0)) {
       // Shoot
       manipulator.intake(1.0);
@@ -44,7 +44,7 @@ public class MultiNote extends Command {
         manipulator.intake(0.0);
       }
       manipulator.shoot(0.0);
-      manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
       drive.gyroDrive(0.375, 0.0);
     } else if (Util.wait(st, 7.0)) {
       // Drive back

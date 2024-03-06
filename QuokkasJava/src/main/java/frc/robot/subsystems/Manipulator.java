@@ -10,13 +10,15 @@ import com.revrobotics.Rev2mDistanceSensor.Port;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.Rev2mDistanceSensor;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Manipulator extends SubsystemBase {
   private static Manipulator instance;
-
-  private DutyCycleEncoder armEnc = new DutyCycleEncoder(1);
+  
+  private DigitalInput input = new DigitalInput(1);
+  private DutyCycleEncoder armEnc = new DutyCycleEncoder(input);
   private CANSparkMax armMotorLeft = new CANSparkMax(5, MotorType.kBrushless);
   private CANSparkMax armMotorRight = new CANSparkMax(6, MotorType.kBrushless);
 
@@ -27,10 +29,13 @@ public class Manipulator extends SubsystemBase {
   private CANSparkMax intakeMotor = new CANSparkMax(9, MotorType.kBrushless);
 
   // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
-  public static final double kARM_FLOOR_POS = 0.584; // intaking
-  public static final double kARM_FENDER_POS = 0.53; // close shot
+  public static final double kARM_FLOOR_POS = 0.181; // intaking
+  public static final double kARM_FENDER_POS = 0.235; // close shot
   public static final double kARM_START_POS = 0.376; // start config
-  public static final double kARM_AMP_POS = 0.325; // amp scoring
+  public static final double kARM_AMP_POS = 0.427; // amp scoring
+  private final double Kp = -15.0;
+  private final double maxPower = 0.3;
+
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
@@ -47,6 +52,8 @@ public class Manipulator extends SubsystemBase {
     armMotorLeft.setOpenLoopRampRate(0.25);
     armMotorRight.setIdleMode(IdleMode.kBrake);
     armMotorRight.setOpenLoopRampRate(0.25);
+    
+    noteSensor.setAutomaticMode(true);
   }
 
   public static Manipulator getInstance() {
@@ -60,14 +67,13 @@ public class Manipulator extends SubsystemBase {
 
   /* See Manipulator::kARM_FLOOR_POS etc. */
   public void armToPos(double pos) {
-    double Kp = -15.0;
+    
     double error = pos - armEnc.getAbsolutePosition();
     double power = Kp * error;
     moveArm(power);
   }
 
   public void moveArm(double power) {
-    final double maxPower = 0.1;
 
     // Stop from making too much torque
     if (power > maxPower) {
@@ -89,8 +95,12 @@ public class Manipulator extends SubsystemBase {
     shooterMotorB.set(-power); // TODO: check polarities
   }
 
+  public double getRange() {
+    return noteSensor.GetRange();
+  }
+
   public boolean getNoteSensor() {
-    if (noteSensor.getRange() > 5) {
+    if (noteSensor.getRange() > 3) {
       return true;
     } else {
     return false;

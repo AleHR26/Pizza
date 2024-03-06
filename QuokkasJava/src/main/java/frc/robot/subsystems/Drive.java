@@ -38,6 +38,26 @@ public class Drive extends SubsystemBase {
     navx.zeroYaw();
   }
 
+  public double getGyroAngle() {
+    return navx.getAngle();
+  }
+
+  public double getL1() {
+    return L1.getOutputCurrent();
+  }
+
+  public double getL2() {
+    return L2.getOutputCurrent();
+  }
+
+  public double getR1() {
+    return R1.getOutputCurrent();
+  }
+
+  public double getR2() {
+    return R2.getOutputCurrent();
+  }
+
   // Calculates power to the motors
   public void move(double power, double steering) {
     double lPower = power - steering;
