@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     if (testinit) {
-      drive.zeroGyro();
+      //drive.zeroGyro();
       testinit = false;
     }
 
@@ -128,9 +128,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {
-   
-  }
+  public void teleopInit() {}
 
   @Override
   public void teleopPeriodic() {
@@ -144,9 +142,10 @@ public class Robot extends TimedRobot {
       // Query the latest result from PhotonVision
       var result = camera.getLatestResult();
       // Put the ID you want to follow or prioritize
-      int targetID = target.getFiducialId();
-
-      if (result.hasTargets() && targetID == 4) {
+      //int targetID = target.getFiducialId();
+      
+      //&& targetID == 4
+      if (result.hasTargets()) {
         // First calculate range
         double range =
             PhotonUtils.calculateDistanceToTargetMeters(
@@ -156,14 +155,14 @@ public class Robot extends TimedRobot {
                 Units.degreesToRadians(result.getBestTarget().getPitch()));
 
         // Use this range as the measurement we give to the PID controller.
-        // -1.0 required to ensure positive PID controller effort _increases_ range
+        // -1.0 required to ensure positive PID controller effort increases range
 
         power =
             forwardController.calculate(
                 range, GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
 
         // Also calculate angular power
-        // -1.0 required to ensure positive PID controller effort _increases_ yaw
+        // -1.0 required to ensure positive PID controller effort increases yaw
         steering =
             turnController.calculate(
                 result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
@@ -189,44 +188,40 @@ public class Robot extends TimedRobot {
 
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
-      //If pressing intake button, and the NOTE is not int the intake
+      // If pressing intake button, and the NOTE is not int the intake
       manipulator.intake(0.375);
       if (m_manipController.getR2Axis() < 0.5) {
         curr_arm_target = Manipulator.kARM_FLOOR_POS;
       }
     } else if (m_manipController.getL1Button()) {
-      //Outtake
+      // Outtake
       manipulator.intake(-1.0);
       manipulator.shoot(-0.25);
     } else {
-      //do nothing
+      // do nothing
       manipulator.intake(0.0);
       manipulator.shoot(0.0);
     }
 
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
-      //If pressing the intake and NOTE is in the intake
+      // If pressing the intake and NOTE is in the intake
       m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
     } else {
       m_manipController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
     }
 
     if (m_manipController.getR1ButtonReleased()) {
-      //No longer intaking, raise intake to avaoid damage
+      // No longer intaking, raise intake to avaoid damage
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
     /* Shooter */
     if (m_manipController.getR2Axis() > 0.1) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
-        //if arm turned back farther than starting config
+        // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        /** 
-         * High goal shooting
-         *  Set shot angle
-         */ 
-
+        /** High goal shooting Set shot angle */
 
         // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
         // double tx = table.getEntry("tx").getDouble(0.0);
@@ -237,13 +232,14 @@ public class Robot extends TimedRobot {
     }
 
     /* Vision aiming section */
-    if (m_manipController.getL2Axis() > 0.1) {
-        manipulator.intake(1.0);
-    }
 
     
+    if (m_manipController.getL2Axis() > 0.1) {
+      manipulator.intake(1.0);
+    }
+
     if (m_manipController.getR2Axis() > 0.5) {
-      //if arm turned back farther than starting config, score AMP
+      // if arm turned back farther than starting config, score AMP
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         manipulator.intake(1.0);
         manipulator.shoot(0.5);
@@ -253,20 +249,20 @@ public class Robot extends TimedRobot {
       }
 
       if (m_manipController.getR1Button()) {
-        //Run intake despite NOTE being in intake
+        // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
       }
     } else {
-      //DO nothing
+      // DO nothing
       manipulator.shoot(0.0);
     }
 
     /*Arm manual control*/
     if (m_manipController.getTriangleButtonPressed()) {
-      //Amp stating config
+      // Amp stating config
       curr_arm_target = Manipulator.kARM_AMP_POS;
     }
- 
+
     if (m_manipController.getPOV(0) == 0) {
       manipulator.moveArm(0.3); // Up
       curr_arm_target = manipulator.getArmEnc();
@@ -278,12 +274,11 @@ public class Robot extends TimedRobot {
     }
 
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
-    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange()); 
-    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle()); 
+    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
+    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("L1-Motor Voltage", drive.getL1());
-    SmartDashboard.putNumber("L1-Motor Voltage", drive.getL2());
-    SmartDashboard.putNumber("L1-Motor Voltage", drive.getR1());
-    SmartDashboard.putNumber("L1-Motor Voltage", drive.getR2());
-    
+    SmartDashboard.putNumber("L2-Motor Voltage", drive.getL2());
+    SmartDashboard.putNumber("R1-Motor Voltage", drive.getR1());
+    SmartDashboard.putNumber("R2-Motor Voltage", drive.getR2());
   }
 }
