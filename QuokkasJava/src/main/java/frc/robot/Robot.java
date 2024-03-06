@@ -276,9 +276,5 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
-    SmartDashboard.putNumber("L1-Motor Voltage", drive.getL1());
-    SmartDashboard.putNumber("L2-Motor Voltage", drive.getL2());
-    SmartDashboard.putNumber("R1-Motor Voltage", drive.getR1());
-    SmartDashboard.putNumber("R2-Motor Voltage", drive.getR2());
   }
 }
