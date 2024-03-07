@@ -6,17 +6,17 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.Rev2mDistanceSensor.Port;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.Rev2mDistanceSensor;
-
+import com.revrobotics.Rev2mDistanceSensor.Port;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Manipulator extends SubsystemBase {
   private static Manipulator instance;
-  
+
   private DigitalInput input = new DigitalInput(1);
   private DutyCycleEncoder armEnc = new DutyCycleEncoder(input);
   private CANSparkMax armMotorLeft = new CANSparkMax(5, MotorType.kBrushless);
@@ -34,8 +34,9 @@ public class Manipulator extends SubsystemBase {
   public static final double kARM_START_POS = 0.376; // start config
   public static final double kARM_AMP_POS = 0.427; // amp scoring
   private final double Kp = -15.0;
-  private final double maxPower = 0.1;
-
+  private final double kd = -0.1;
+  private final double maxPower = 0.35;
+  double lasterror = 0;
 
   private Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
@@ -52,7 +53,7 @@ public class Manipulator extends SubsystemBase {
     armMotorLeft.setOpenLoopRampRate(0.25);
     armMotorRight.setIdleMode(IdleMode.kBrake);
     armMotorRight.setOpenLoopRampRate(0.25);
-    
+
     noteSensor.setAutomaticMode(true);
   }
 
@@ -67,10 +68,13 @@ public class Manipulator extends SubsystemBase {
 
   /* See Manipulator::kARM_FLOOR_POS etc. */
   public void armToPos(double pos) {
-    
+
     double error = pos - armEnc.getAbsolutePosition();
-    double power = Kp * error;
+    double errorrate = error-lasterror;
+    double power = Kp * error + kd*errorrate;
     moveArm(power);
+    SmartDashboard.putNumber("ArmPower", power);
+    lasterror = error;
   }
 
   public void moveArm(double power) {
@@ -103,7 +107,7 @@ public class Manipulator extends SubsystemBase {
     if (noteSensor.getRange() > 3) {
       return true;
     } else {
-    return false;
+      return false;
+    }
   }
-}
 }

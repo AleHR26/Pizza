@@ -42,7 +42,6 @@ public class Drive extends SubsystemBase {
     return navx.getAngle();
   }
 
-
   // Calculates power to the motors
   public void move(double power, double steering) {
     double lPower = power - steering;

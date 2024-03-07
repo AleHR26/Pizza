@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     if (testinit) {
-      //drive.zeroGyro();
+      // drive.zeroGyro();
       testinit = false;
     }
 
@@ -142,9 +142,9 @@ public class Robot extends TimedRobot {
       // Query the latest result from PhotonVision
       var result = camera.getLatestResult();
       // Put the ID you want to follow or prioritize
-      //int targetID = target.getFiducialId();
-      
-      //&& targetID == 4
+      // int targetID = target.getFiducialId();
+
+      // && targetID == 4
       if (result.hasTargets()) {
         // First calculate range
         double range =
@@ -173,8 +173,8 @@ public class Robot extends TimedRobot {
       }
     } else {
       // Manual Driver Mode
-      power = m_driveController.getRightX() * 0.7;
-      steering = m_driveController.getLeftY() * 0.7;
+      power = m_driveController.getRightX() * 0.6;
+      steering = m_driveController.getLeftY() * 0.6;
 
       if (Math.abs(steering) < 0.1) {
         steering = 0;
@@ -233,7 +233,6 @@ public class Robot extends TimedRobot {
 
     /* Vision aiming section */
 
-    
     if (m_manipController.getL2Axis() > 0.1) {
       manipulator.intake(1.0);
     }
@@ -264,10 +263,10 @@ public class Robot extends TimedRobot {
     }
 
     if (m_manipController.getPOV(0) == 0) {
-      manipulator.moveArm(0.3); // Up
+      manipulator.moveArm(0.15); // Up
       curr_arm_target = manipulator.getArmEnc();
     } else if (m_manipController.getPOV(0) == 180) {
-      manipulator.moveArm(-0.3); // Down
+      manipulator.moveArm(-0.15); // Down
       curr_arm_target = manipulator.getArmEnc();
     } else {
       manipulator.armToPos(curr_arm_target);
@@ -276,5 +275,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
+    SmartDashboard.putNumber("Arm Target", curr_arm_target);
   }
 }

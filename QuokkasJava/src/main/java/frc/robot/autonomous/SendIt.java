@@ -8,7 +8,7 @@ import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 
 public class SendIt {
-  private double[] st = {0.0}; // start time, wrapped in an array
+  private double st = 0; // start time, wrapped in an array
 
   public SendIt() {}
 
@@ -16,8 +16,8 @@ public class SendIt {
     Manipulator manipulator = Manipulator.getInstance();
     Drive drive = Drive.getInstance();
 
-    st[0] = System.currentTimeMillis() / 1000.0; // Get current time in seconds
-    SmartDashboard.putNumber("start time", st[0]);
+    st = System.currentTimeMillis() / 1000.0; // Get current time in seconds
+    SmartDashboard.putNumber("start time", st);
 
     SmartDashboard.putNumber("time", System.currentTimeMillis() / 1000.0);
 
