@@ -212,7 +212,7 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        /** High goal shooting, Set shot angle */
+        /** High goal shooting, Set automatic shot angle */
 
         // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
         // double tx = table.getEntry("tx").getDouble(0.0);
