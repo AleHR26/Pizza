@@ -25,15 +25,15 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
 
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  private final String kAutoNameDefault = "Default";
-  private final String kAutoNameCustom = "My Auto";
+  private static final String NothingAuto = "do nothing";
+  private static final String Sendit = "Sendit/3notes";
+  private static final String Multinote = "Multinote/2notes";
+  private static final String Basic = "Basic/drive";
   private String m_autoSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private PS5Controller m_manipController;
   private PS5Controller m_driveController;
-  private Timer autoTimer;
-  private double lastTimestamp; // Add this line for missing variable
-
+  
   PhotonCamera camera;
   PhotonTrackedTarget target;
   /* Mechanisms */
@@ -43,9 +43,9 @@ public class Robot extends TimedRobot {
   private double curr_arm_target;
 
   /* Autonomous Modes */
-  private Basic basic;
-  private MultiNote multinote;
-  private SendIt sendit;
+  private Basic basic = new Basic();
+  private MultiNote multinote = new MultiNote();
+  private SendIt sendit = new SendIt();
 
   // PID constants should be tuned per robot
   // TODO: Tune the PID.
@@ -64,11 +64,8 @@ public class Robot extends TimedRobot {
     curr_arm_target = Manipulator.kARM_START_POS; // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
     // (manipulator.get())
 
-    m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
-    m_chooser.addOption("Basic", "Basic");
-    m_chooser.addOption("MultiNote", "MultiNote");
-    m_chooser.addOption("SendIt", "SendIt");
-
+    m_chooser.setDefaultOption(NothingAuto, NothingAuto);
+    
     SmartDashboard.putData("Auto Modes", m_chooser);
 
     m_driveController = new PS5Controller(PS5ControllerPorts.DRIVETRAIN_PORT);
@@ -79,38 +76,92 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    double matchTime = Timer.getMatchTime();
-    double currentTimeStamp = Timer.getFPGATimestamp();
-    double dt = currentTimeStamp - lastTimestamp;
+    SmartDashboard.putNumber("Time (seconds)", Timer.getFPGATimestamp());
+  }  
+  
 
-    lastTimestamp = currentTimeStamp;
-  }
+  double AUTO_DRIVE_SPEED;
+  double AUTO_LAUNCHER_SPEED;
+  double AUTO_INTAKE_SPEED;
+  double AUTO_ARM_SPEED;
 
-  private boolean testinit;
+  double autonomousStartTime;
 
   @Override
   public void autonomousInit() {
+   m_autoSelected = m_chooser.getSelected();
+   System.out.println("Auto selected: " + m_autoSelected);
 
-    m_autoSelected = m_chooser.getSelected();
-    System.out.println("Auto selected: " + m_autoSelected);
 
-    basic = new Basic();
-    multinote = new MultiNote();
-    sendit = new SendIt();
+    AUTO_DRIVE_SPEED = -0.5;
+    AUTO_LAUNCHER_SPEED = 1;
+    AUTO_INTAKE_SPEED = 1;
+    AUTO_ARM_SPEED = 1;
+
+    if(m_autoSelected == Basic)
+    {
+      AUTO_LAUNCHER_SPEED = 0;
+      AUTO_INTAKE_SPEED = 0;
+      AUTO_ARM_SPEED = 0;
+    }
+    else if(m_autoSelected == NothingAuto)
+    {
+      AUTO_DRIVE_SPEED = 0;
+      AUTO_LAUNCHER_SPEED = 0;
+      AUTO_INTAKE_SPEED = 0;
+      AUTO_ARM_SPEED = 0;
+    }
+
+    autonomousStartTime = Timer.getFPGATimestamp();
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (testinit) {
-      // drive.zeroGyro();
-      testinit = false;
+    double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
+
+    if (m_autoSelected == Basic) {
+      basic.run();
+    } else if (m_autoSelected == Multinote) {
+      if (timeElapsed < 2.0) {
+      // Lower arm
+      manipulator.shoot(0.00);
+      manipulator.armToPos(0.00);
+    } else if (timeElapsed < 4.0) {
+      // Shoot
+      manipulator.intake(1.0);
+      manipulator.shoot(0.5);
+      manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+    } else if (timeElapsed < 5.5) {
+      // Drive, intake
+      if (manipulator.getNoteSensor()) {
+        manipulator.intake(0.375);
+      } else {
+        manipulator.intake(0.0);
+      }
+      manipulator.shoot(0.0);
+      manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
+      drive.gyroDrive(0.375, 0.0);
+    } else if (timeElapsed < 7.0) {
+      // Drive back
+      manipulator.intake(0.0);
+      manipulator.shoot(0.5);
+      manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      drive.gyroDrive(-0.5, 0.0);
+    } else if (timeElapsed < 9.0) {
+      // Drive back
+      manipulator.intake(1.0);
+      manipulator.shoot(0.5);
+      manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      drive.gyroDrive(0.0, 0.0);
+    } else {
+      // Finally,
+      drive.move(0.0, 0.0); // Stop
+      manipulator.intake(0.0);
+      manipulator.shoot(0.0);
+      manipulator.armToPos(Manipulator.kARM_FENDER_POS); 
     }
 
-    if ("Basic".equals(m_autoSelected)) {
-      basic.run();
-    } else if ("MultiNote".equals(m_autoSelected)) {
-      multinote.run();
-    } else if ("SendIt".equals(m_autoSelected)) {
+    } else if (m_autoSelected == Sendit) {
       sendit.run();
     } else {
       basic.run();

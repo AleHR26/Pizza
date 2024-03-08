@@ -32,7 +32,7 @@ public class MultiNote extends Command {
       // Lower arm
       manipulator.shoot(0.01);
       manipulator.armToPos(0.00);
-    } /*else if (Util.wait(st, 4.0)) {
+    } else if (Util.wait(st, 4.0)) {
       // Shoot
       manipulator.intake(1.0);
       manipulator.shoot(0.5);
@@ -66,5 +66,5 @@ public class MultiNote extends Command {
       manipulator.shoot(0.0);
       manipulator.armToPos(Manipulator.kARM_FENDER_POS); 
     }
-  /* */}
+  }
 }
