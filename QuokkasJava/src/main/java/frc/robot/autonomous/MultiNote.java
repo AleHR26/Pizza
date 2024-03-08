@@ -13,8 +13,8 @@ import frc.robot.subsystems.Manipulator;
 
 public class MultiNote extends Command {
    double st = 0; // start time, wrapped in an array
-   private Manipulator manipulator;
-   private Drive drive;
+   private Manipulator manipulator = new Manipulator();
+   private Drive drive = new Drive();
 
   public MultiNote() {
     st = Timer.getFPGATimestamp(); // Get current time in seconds

@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.PS5ControllerPorts;
+import frc.robot.Constants.PhotonVisionConstants;
 import frc.robot.autonomous.Basic;
 import frc.robot.autonomous.MultiNote;
 import frc.robot.autonomous.SendIt;
@@ -45,17 +47,6 @@ public class Robot extends TimedRobot {
   private MultiNote multinote;
   private SendIt sendit;
 
-  // Constants such as camera and target height stored. Change per robot and goal.
-  static final double CAMERA_HEIGHT_METERS =
-      Units.inchesToMeters(20); // TODO: Change Photon constants to Margarita
-  static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
-
-  /** Angle between horizontal and the camera. */
-  static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
-
-  /** How far from the target we want to be */
-  static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
-
   // PID constants should be tuned per robot
   // TODO: Tune the PID.
   final double LINEAR_P = 10;
@@ -80,8 +71,8 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
-    m_driveController = new PS5Controller(0);
-    m_manipController = new PS5Controller(0);
+    m_driveController = new PS5Controller(PS5ControllerPorts.DRIVETRAIN_PORT);
+    m_manipController = new PS5Controller(PS5ControllerPorts.MANIPULATOR_PORT);
 
     camera = new PhotonCamera("Camera");
   }
@@ -149,9 +140,9 @@ public class Robot extends TimedRobot {
         // First calculate range
         double range =
             PhotonUtils.calculateDistanceToTargetMeters(
-                CAMERA_HEIGHT_METERS,
-                TARGET_HEIGHT_METERS,
-                CAMERA_PITCH_RADIANS,
+                PhotonVisionConstants.CAMERA_HEIGHT_METERS,
+                PhotonVisionConstants.TARGET_HEIGHT_METERS,
+                PhotonVisionConstants.CAMERA_PITCH_RADIANS,
                 Units.degreesToRadians(result.getBestTarget().getPitch()));
 
         // Use this range as the measurement we give to the PID controller.
@@ -159,7 +150,7 @@ public class Robot extends TimedRobot {
 
         power =
             forwardController.calculate(
-                range, GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
+                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
@@ -221,7 +212,7 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        /** High goal shooting Set shot angle */
+        /** High goal shooting, Set shot angle */
 
         // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
         // double tx = table.getEntry("tx").getDouble(0.0);
@@ -246,15 +237,17 @@ public class Robot extends TimedRobot {
         // High goal shooting
         manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
+    }
 
-      if (m_manipController.getR1Button()) {
+    /*if (m_manipController.getR1Button()) {
         // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
       }
     } else {
       // DO nothing
       manipulator.shoot(0.0);
-    }
+    } */
+  
 
     /*Arm manual control*/
     if (m_manipController.getTriangleButtonPressed()) {

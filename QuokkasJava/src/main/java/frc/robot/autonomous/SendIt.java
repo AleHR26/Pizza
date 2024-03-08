@@ -9,13 +9,12 @@ import frc.robot.subsystems.Manipulator;
 
 public class SendIt {
   private double st = 0; // start time, wrapped in an array
+  Manipulator manipulator = new Manipulator(); // before: Manipulator manipulator = Manipulator.getInstance();
+  Drive drive = new Drive(); // before: Drive drive = new Drive.getInstance();
 
   public SendIt() {}
 
   public void run() {
-    Manipulator manipulator = Manipulator.getInstance();
-    Drive drive = Drive.getInstance();
-
     st = System.currentTimeMillis() / 1000.0; // Get current time in seconds
     SmartDashboard.putNumber("start time", st);
 

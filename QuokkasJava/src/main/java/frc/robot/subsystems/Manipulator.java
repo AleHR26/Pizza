@@ -38,7 +38,7 @@ public class Manipulator extends SubsystemBase {
   private final double maxPower = 0.35;
   double lasterror = 0;
 
-  private Manipulator() {
+  public Manipulator() {
     armMotorLeft.follow(armMotorRight, true);
     // shooterMotorB.follow(shooterMotorA);
 

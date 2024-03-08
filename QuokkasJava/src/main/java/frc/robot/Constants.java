@@ -9,15 +9,25 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public class Constants {
 
-  public static class PhotonVisionConstants {
-    // Constants such as camera and target height stored. Change per robot and goal!
-    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20);
-    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(1);
-    // Angle between horizontal and the camera.
-    static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(180);
+  public class PS5ControllerPorts {
+    final static int MANIPULATOR_PORT = 0;
+    final static int DRIVETRAIN_PORT = 0;
+  }
 
-    // How far from the target we want to be
-    static final double GOAL_RANGE_METERS = Units.feetToMeters(1.6);
+  public static class PhotonVisionConstants {
+    // TODO: Change Photon constants to Margarita
+
+    /** Camera height stored. Change per robot and goal. */
+    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); 
+
+    /** Constants such as camera and target height stored. Change per robot and goal. */
+    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+
+    /** Angle between horizontal and the camera. */
+    static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+
+    /** How far from the target we want to be */
+    static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
   }
 
   public static class DrivetrainConstants {
