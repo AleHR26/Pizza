@@ -32,10 +32,10 @@ public class Manipulator extends SubsystemBase {
   public static final double kARM_FLOOR_POS = 0.181; // intaking
   public static final double kARM_FENDER_POS = 0.235; // close shot
   public static final double kARM_START_POS = 0.376; // start config
-  public static final double kARM_AMP_POS = 0.427; // amp scoring
+  public static final double kARM_AMP_POS = 0.45; // amp scoring 
   private final double Kp = -15.0;
-  private final double kd = -0.1;
-  private final double maxPower = 0.35;
+  private final double kd = -9.0;
+  private final double maxPower = 0.5;
   double lasterror = 0;
 
   public Manipulator() {

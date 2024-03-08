@@ -20,7 +20,7 @@ public class Constants {
     /** Camera height stored. Change per robot and goal. */
     static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); 
 
-    /** Constants such as camera and target height stored. Change per robot and goal. */
+    /** Target height stored. Change per robot and goal. */
     static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
 
     /** Angle between horizontal and the camera. */

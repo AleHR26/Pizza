@@ -90,7 +90,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    testinit = true;
 
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
@@ -237,16 +236,16 @@ public class Robot extends TimedRobot {
         // High goal shooting
         manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
-    }
 
-    /*if (m_manipController.getR1Button()) {
+    if (m_manipController.getR1Button()) {
         // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
+       
       }
-    } else {
-      // DO nothing
-      manipulator.shoot(0.0);
-    } */
+      } else {
+        manipulator.shoot(0.0);
+      }
+
   
 
     /*Arm manual control*/

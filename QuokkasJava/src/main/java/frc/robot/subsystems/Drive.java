@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.SPI;
@@ -18,6 +19,10 @@ public class Drive extends SubsystemBase {
   // Singleton pattern
   public Drive() {
     // Controls current to motors
+    L1.setIdleMode(IdleMode.kBrake);
+    L2.setIdleMode(IdleMode.kBrake);
+    R1.setIdleMode(IdleMode.kBrake);
+    R2.setIdleMode(IdleMode.kBrake);
     L1.setSmartCurrentLimit(60);
     L2.setSmartCurrentLimit(60);
     R1.setSmartCurrentLimit(60);

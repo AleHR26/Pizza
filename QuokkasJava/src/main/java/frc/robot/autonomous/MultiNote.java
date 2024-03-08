@@ -23,16 +23,14 @@ public class MultiNote extends Command {
   }
 
   public void run() {
-    System.out.println(st);
+    double timeElapsed = Timer.getFPGATimestamp() - st;
     // Equivalent of 'using namespace subsystems;' in C++
     // Importing specific classes instead of the entire package
     // to avoid naming conflicts.
 
-    SmartDashboard.putNumber("time", Timer.getFPGATimestamp());
-
-    if (Util.wait(st, 2.0)) {
+    if (timeElapsed < 2.0) {
       // Lower arm
-      manipulator.shoot(0.0);
+      manipulator.shoot(0.01);
       manipulator.armToPos(0.00);
     } /*else if (Util.wait(st, 4.0)) {
       // Shoot
