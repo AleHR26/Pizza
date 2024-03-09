@@ -35,7 +35,7 @@ public class Manipulator extends SubsystemBase {
   public static final double kARM_AMP_POS = 0.45; // amp scoring 
   private final double Kp = -15.0;
   private final double kd = -9.0;
-  private final double maxPower = 0.5;
+  private final double maxPower = 0.08;
   double lasterror = 0;
 
   public Manipulator() {

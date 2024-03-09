@@ -47,6 +47,12 @@ public class Robot extends TimedRobot {
   private MultiNote multinote = new MultiNote();
   private SendIt sendit = new SendIt();
 
+  static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); 
+  static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+  static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+
+
+
   // PID constants should be tuned per robot
   // TODO: Tune the PID.
   final double LINEAR_P = 10;
@@ -176,6 +182,15 @@ public class Robot extends TimedRobot {
     // Drive
     double power;
     double steering;
+    double armEnc;
+    double armpower;
+    double armDis;
+    double x;
+
+    power = m_driveController.getRightX() * 0.6;
+    if (Math.abs(power) < 0.1) {
+      power = 0;
+    }
 
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
@@ -188,20 +203,6 @@ public class Robot extends TimedRobot {
       // && targetID == 4
       if (result.hasTargets()) {
         // First calculate range
-        double range =
-            PhotonUtils.calculateDistanceToTargetMeters(
-                PhotonVisionConstants.CAMERA_HEIGHT_METERS,
-                PhotonVisionConstants.TARGET_HEIGHT_METERS,
-                PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(result.getBestTarget().getPitch()));
-
-        // Use this range as the measurement we give to the PID controller.
-        // -1.0 required to ensure positive PID controller effort increases range
-
-        power =
-            forwardController.calculate(
-                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
-
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
         steering =
@@ -209,19 +210,14 @@ public class Robot extends TimedRobot {
                 result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
       } else {
         // If we have no targets, stay still.
-        power = 0;
         steering = 0;
       }
     } else {
       // Manual Driver Mode
-      power = m_driveController.getRightX() * 0.6;
       steering = m_driveController.getLeftY() * 0.6;
 
       if (Math.abs(steering) < 0.1) {
         steering = 0;
-      }
-      if (Math.abs(power) < 0.1) {
-        power = 0;
       }
     }
 
@@ -263,14 +259,37 @@ public class Robot extends TimedRobot {
         manipulator.shoot(0.25);
       } else {
         /** High goal shooting, Set automatic shot angle */
+       var result = camera.getLatestResult();
+       if (result.hasTargets()) {
 
-        // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-        // double tx = table.getEntry("tx").getDouble(0.0);
-        // double Kp = 0.05;
-        // drive.move(power, Kp * tx);
-        // SmartDashboard.putNumber("tx", tx);
+        double range =
+        PhotonUtils.calculateDistanceToTargetMeters(
+                CAMERA_HEIGHT_METERS,
+                TARGET_HEIGHT_METERS,
+                CAMERA_PITCH_RADIANS,
+                Units.degreesToRadians(result.getBestTarget().getPitch()));
+        // First calculate range
+        // Also calculate angular power
+        // -1.0 required to ensure positive PID controller effort increases yaw
+        armDis =  0.95;
+        armEnc = 0.235;
+        armpower = range * armEnc;
+        x = armpower / armDis;
+
+        //95 cm + 0.95m
+        //0.235 enc
+        SmartDashboard.putNumber("X value", x);
+        SmartDashboard.putNumber("range", range);
+
+        manipulator.armToPos(x);
+        
+
+      } else {
+        // If we have no targets, stay still.
+        steering = 0;
       }
     }
+  }
 
     /* Vision aiming section */
 
