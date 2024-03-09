@@ -40,9 +40,7 @@ public class Robot extends TimedRobot {
   private Manipulator manipulator; // Change variable name to match your class name
 
   private double curr_arm_target;
-  private double targetWidthInches = 6.0; // Width of the AprilTag in inches
-  private double cameraMountingHeight = 20.0; // Height of the camera mounting in inches
-
+  
   /* Autonomous Modes */
   private Basic basic;
   private MultiNote multinote;
