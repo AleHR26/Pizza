@@ -55,8 +55,8 @@ public class Robot extends TimedRobot {
   final double LINEAR_D = 8;
   PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
 
-  final double ANGULAR_P = 10;
-  final double ANGULAR_D = 8;
+  final double ANGULAR_P = 0.0095;
+  final double ANGULAR_D = 0.002;
   PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
 
   @Override
@@ -128,6 +128,12 @@ public class Robot extends TimedRobot {
     double power;
     double steering;
 
+    power = m_driveController.getLeftY() * 0.6; 
+    if (Math.abs(power) < 0.1) {
+      power = 0;
+    }
+    
+
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
       // Vision-alignment mode
@@ -139,41 +145,38 @@ public class Robot extends TimedRobot {
       // && targetID == 4
       if (result.hasTargets()) {
         // First calculate range
-        double range =
+        /*double range =
             PhotonUtils.calculateDistanceToTargetMeters(
                 PhotonVisionConstants.CAMERA_HEIGHT_METERS,
                 PhotonVisionConstants.TARGET_HEIGHT_METERS,
                 PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(result.getBestTarget().getPitch()));
+                Units.degreesToRadians(result.getBestTarget().getPitch())); 
 
         // Use this range as the measurement we give to the PID controller.
         // -1.0 required to ensure positive PID controller effort increases range
 
-        power =
+        /*power =
             forwardController.calculate(
-                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
+                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying */
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
         steering =
-            turnController.calculate(
+            -turnController.calculate(
                 result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
       } else {
         // If we have no targets, stay still.
-        power = 0;
+        //power = 0;
         steering = 0;
       }
     } else {
       // Manual Driver Mode
-      power = m_driveController.getRightX() * 0.6;
-      steering = m_driveController.getLeftY() * 0.6;
+      steering = m_driveController.getRightX() * 0.6;
 
       if (Math.abs(steering) < 0.1) {
         steering = 0;
       }
-      if (Math.abs(power) < 0.1) {
-        power = 0;
-      }
+      
     }
 
     drive.move(power, steering);
@@ -216,7 +219,7 @@ public class Robot extends TimedRobot {
       } else {
         
         /** High goal shooting, Set automatic shot angle */
-        var result = camera.getLatestResult();
+        //var result = camera.getLatestResult();
 
         /*if (result.hasTargets()) {
           // Display the distance on SmartDashboard
@@ -288,10 +291,10 @@ public class Robot extends TimedRobot {
     }
 
     if (m_manipController.getPOV(0) == 0) {
-      manipulator.moveArm(0.15); // Up
+      manipulator.moveArm(-0.15); // Up
       curr_arm_target = manipulator.getArmEnc();
     } else if (m_manipController.getPOV(0) == 180) {
-      manipulator.moveArm(-0.15); // Down
+      manipulator.moveArm(0.15); // Down
       curr_arm_target = manipulator.getArmEnc();
     } else {
       manipulator.armToPos(curr_arm_target);
