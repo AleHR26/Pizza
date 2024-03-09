@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -176,6 +178,14 @@ public class Robot extends TimedRobot {
 
     drive.move(power, steering);
 
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+
+    // read values periodically
+    double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+    double shotAngle = 0.00000008 * Math.pow(ty, 2) + 0.0000588899018* ty + 0.2242197194394;
+    SmartDashboard.putNumber("shotAngle", shotAngle);
+    SmartDashboard.putNumber("PhotonY", ty);
+
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
       // If pressing intake button, and the NOTE is not int the intake
@@ -211,47 +221,10 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-
         /** High goal shooting, Set automatic shot angle */
-        // var result = camera.getLatestResult();
-
-        /*if (result.hasTargets()) {
-           // Display the distance on SmartDashboard
-           /*SmartDashboard.putNumber("Distance to AprilTag (m)", distance);
-
-           double range =
-           PhotonUtils.calculateDistanceToTargetMeters(
-               PhotonVisionConstants.CAMERA_HEIGHT_METERS,
-               PhotonVisionConstants.TARGET_HEIGHT_METERS,
-               PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-               Units.degreesToRadians(result.getBestTarget().getPitch()));
-
-               PhotonUtils.Pose
-
-               PhotonUtils.getDistanceToPose(null, null);
-          // First calculate range
-          // Also calculate angular power
-          // -1.0 required to ensure positive PID controller effort increases yaw
-          double armDis =  0.95;
-          double armEnc = 0.235;
-          double armpower = range * armEnc;
-          double x = armpower / armDis;
-
-          SmartDashboard.putNumber("X value", x);
-          SmartDashboard.putNumber("range", range);
-          SmartDashboard.putNumber("arm power", armpower);
-
-          manipulator.armToPos(x);
-
-
-        } else {
-          // If we have no targets, stay still.
-          manipulator.getArmEnc();
-        } */
+        curr_arm_target = shotAngle;
       }
     }
-
-    /* Vision aiming section */
 
     if (m_manipController.getL2Axis() > 0.1) {
       manipulator.intake(1.0);
