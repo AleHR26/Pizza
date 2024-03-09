@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -149,7 +151,9 @@ public class Robot extends TimedRobot {
 
         power =
             forwardController.calculate(
-                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
+                range,
+                PhotonVisionConstants
+                    .GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
@@ -175,6 +179,14 @@ public class Robot extends TimedRobot {
     }
 
     drive.move(power, steering);
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+
+    // read values periodically
+    double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+    double shotAngle = -0.00000029436 * Math.pow(ty, 2) + 0.0006956 * ty + -0.6016;
+    SmartDashboard.putNumber("shotAngle", shotAngle);
+    SmartDashboard.putNumber("PhotonY", ty);
 
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
@@ -211,13 +223,21 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        /** High goal shooting, Set automatic shot angle */
 
-        // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-        // double tx = table.getEntry("tx").getDouble(0.0);
-        // double Kp = 0.05;
-        // drive.move(power, Kp * tx);
-        // SmartDashboard.putNumber("tx", tx);
+         
+        double err = -shotAngle + 0.765;
+        SmartDashboard.putNumber("err", err);
+        curr_arm_target = err;
+        // post to smart dashboard periodically
+       
+        /** High goal shooting, Set automatic shot angle */
+        // High goal shooting
+        // Set shot angle
+        // std::shared_ptr<nt::NetworkTable> table =
+        // nt::NetworkTableInstance::GetDefault().GetTable("limelight");
+        // double ty = table->GetNumber("ty", 0.0);
+        // double shot_angle = -0.00008 * pow(ty,2) + .00252*ty + .4992;
+        // this->curr_arm_target = shot_angle;
       }
     }
 
@@ -237,16 +257,13 @@ public class Robot extends TimedRobot {
         manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
 
-    if (m_manipController.getR1Button()) {
+      if (m_manipController.getR1Button()) {
         // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
-       
       }
-      } else {
-        manipulator.shoot(0.0);
-      }
-
-  
+    } else {
+      manipulator.shoot(0.0);
+    }
 
     /*Arm manual control*/
     if (m_manipController.getTriangleButtonPressed()) {

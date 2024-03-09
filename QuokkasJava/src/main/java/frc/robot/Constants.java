@@ -10,15 +10,15 @@ import edu.wpi.first.math.util.Units;
 public class Constants {
 
   public class PS5ControllerPorts {
-    final static int MANIPULATOR_PORT = 0;
-    final static int DRIVETRAIN_PORT = 0;
+    static final int MANIPULATOR_PORT = 0;
+    static final int DRIVETRAIN_PORT = 0;
   }
 
   public static class PhotonVisionConstants {
     // TODO: Change Photon constants to Margarita
 
     /** Camera height stored. Change per robot and goal. */
-    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); 
+    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20);
 
     /** Target height stored. Change per robot and goal. */
     static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
