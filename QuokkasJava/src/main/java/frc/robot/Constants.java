@@ -18,10 +18,10 @@ public class Constants {
     // TODO: Change Photon constants to Margarita
 
     /** Camera height stored. Change per robot and goal. */
-    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20); 
+    static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(7); 
 
     /** Target height stored. Change per robot and goal. */
-    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.4);
+    static final double TARGET_HEIGHT_METERS = Units.feetToMeters(4.26);
 
     /** Angle between horizontal and the camera. */
     static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);

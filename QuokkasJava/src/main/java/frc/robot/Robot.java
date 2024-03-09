@@ -41,6 +41,8 @@ public class Robot extends TimedRobot {
   private Manipulator manipulator; // Change variable name to match your class name
 
   private double curr_arm_target;
+  private double targetWidthInches = 6.0; // Width of the AprilTag in inches
+    private double cameraMountingHeight = 20.0; // Height of the camera mounting in inches
 
   /* Autonomous Modes */
   private Basic basic;
@@ -204,21 +206,52 @@ public class Robot extends TimedRobot {
       // No longer intaking, raise intake to avaoid damage
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
-
+    
+    
     /* Shooter */
     if (m_manipController.getR2Axis() > 0.1) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
+        
         /** High goal shooting, Set automatic shot angle */
+        var result = camera.getLatestResult();
 
-        // NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-        // double tx = table.getEntry("tx").getDouble(0.0);
-        // double Kp = 0.05;
-        // drive.move(power, Kp * tx);
-        // SmartDashboard.putNumber("tx", tx);
-      }
+        /*if (result.hasTargets()) {
+          // Display the distance on SmartDashboard
+          /*SmartDashboard.putNumber("Distance to AprilTag (m)", distance);
+ 
+          double range =
+          PhotonUtils.calculateDistanceToTargetMeters(
+              PhotonVisionConstants.CAMERA_HEIGHT_METERS,
+              PhotonVisionConstants.TARGET_HEIGHT_METERS,
+              PhotonVisionConstants.CAMERA_PITCH_RADIANS,
+              Units.degreesToRadians(result.getBestTarget().getPitch()));
+
+              PhotonUtils.Pose
+
+              PhotonUtils.getDistanceToPose(null, null);
+         // First calculate range
+         // Also calculate angular power
+         // -1.0 required to ensure positive PID controller effort increases yaw
+         double armDis =  0.95;
+         double armEnc = 0.235;
+         double armpower = range * armEnc;
+         double x = armpower / armDis;
+ 
+         SmartDashboard.putNumber("X value", x);
+         SmartDashboard.putNumber("range", range);
+         SmartDashboard.putNumber("arm power", armpower);
+ 
+         manipulator.armToPos(x);
+         
+ 
+       } else {
+         // If we have no targets, stay still.
+         manipulator.getArmEnc();
+       } */
+     }
     }
 
     /* Vision aiming section */
@@ -268,5 +301,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("Arm Target", curr_arm_target);
+    
   }
 }
