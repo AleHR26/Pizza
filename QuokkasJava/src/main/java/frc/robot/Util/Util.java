@@ -10,6 +10,5 @@ public class Util {
   /* Note that step_start is passed by reference and incremented by `duration` seconds. */
   public static boolean wait(double stepStart, double duration) {
     return Timer.getFPGATimestamp() < stepStart + duration; // Increment step_start by duration
-    
   }
 }

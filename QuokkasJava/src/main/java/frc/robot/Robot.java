@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -13,14 +12,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.PS5ControllerPorts;
-import frc.robot.Constants.PhotonVisionConstants;
 import frc.robot.autonomous.Basic;
 import frc.robot.autonomous.MultiNote;
 import frc.robot.autonomous.SendIt;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
@@ -42,7 +39,7 @@ public class Robot extends TimedRobot {
 
   private double curr_arm_target;
   private double targetWidthInches = 6.0; // Width of the AprilTag in inches
-    private double cameraMountingHeight = 20.0; // Height of the camera mounting in inches
+  private double cameraMountingHeight = 20.0; // Height of the camera mounting in inches
 
   /* Autonomous Modes */
   private Basic basic;
@@ -128,11 +125,10 @@ public class Robot extends TimedRobot {
     double power;
     double steering;
 
-    power = m_driveController.getLeftY() * 0.6; 
+    power = m_driveController.getLeftY() * 0.6;
     if (Math.abs(power) < 0.1) {
       power = 0;
     }
-    
 
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
@@ -150,7 +146,7 @@ public class Robot extends TimedRobot {
                 PhotonVisionConstants.CAMERA_HEIGHT_METERS,
                 PhotonVisionConstants.TARGET_HEIGHT_METERS,
                 PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(result.getBestTarget().getPitch())); 
+                Units.degreesToRadians(result.getBestTarget().getPitch()));
 
         // Use this range as the measurement we give to the PID controller.
         // -1.0 required to ensure positive PID controller effort increases range
@@ -166,7 +162,7 @@ public class Robot extends TimedRobot {
                 result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
       } else {
         // If we have no targets, stay still.
-        //power = 0;
+        // power = 0;
         steering = 0;
       }
     } else {
@@ -176,7 +172,6 @@ public class Robot extends TimedRobot {
       if (Math.abs(steering) < 0.1) {
         steering = 0;
       }
-      
     }
 
     drive.move(power, steering);
@@ -209,52 +204,51 @@ public class Robot extends TimedRobot {
       // No longer intaking, raise intake to avaoid damage
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
-    
-    
+
     /* Shooter */
     if (m_manipController.getR2Axis() > 0.1) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        
+
         /** High goal shooting, Set automatic shot angle */
-        //var result = camera.getLatestResult();
+        // var result = camera.getLatestResult();
 
         /*if (result.hasTargets()) {
-          // Display the distance on SmartDashboard
-          /*SmartDashboard.putNumber("Distance to AprilTag (m)", distance);
- 
-          double range =
-          PhotonUtils.calculateDistanceToTargetMeters(
-              PhotonVisionConstants.CAMERA_HEIGHT_METERS,
-              PhotonVisionConstants.TARGET_HEIGHT_METERS,
-              PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-              Units.degreesToRadians(result.getBestTarget().getPitch()));
+           // Display the distance on SmartDashboard
+           /*SmartDashboard.putNumber("Distance to AprilTag (m)", distance);
 
-              PhotonUtils.Pose
+           double range =
+           PhotonUtils.calculateDistanceToTargetMeters(
+               PhotonVisionConstants.CAMERA_HEIGHT_METERS,
+               PhotonVisionConstants.TARGET_HEIGHT_METERS,
+               PhotonVisionConstants.CAMERA_PITCH_RADIANS,
+               Units.degreesToRadians(result.getBestTarget().getPitch()));
 
-              PhotonUtils.getDistanceToPose(null, null);
-         // First calculate range
-         // Also calculate angular power
-         // -1.0 required to ensure positive PID controller effort increases yaw
-         double armDis =  0.95;
-         double armEnc = 0.235;
-         double armpower = range * armEnc;
-         double x = armpower / armDis;
- 
-         SmartDashboard.putNumber("X value", x);
-         SmartDashboard.putNumber("range", range);
-         SmartDashboard.putNumber("arm power", armpower);
- 
-         manipulator.armToPos(x);
-         
- 
-       } else {
-         // If we have no targets, stay still.
-         manipulator.getArmEnc();
-       } */
-     }
+               PhotonUtils.Pose
+
+               PhotonUtils.getDistanceToPose(null, null);
+          // First calculate range
+          // Also calculate angular power
+          // -1.0 required to ensure positive PID controller effort increases yaw
+          double armDis =  0.95;
+          double armEnc = 0.235;
+          double armpower = range * armEnc;
+          double x = armpower / armDis;
+
+          SmartDashboard.putNumber("X value", x);
+          SmartDashboard.putNumber("range", range);
+          SmartDashboard.putNumber("arm power", armpower);
+
+          manipulator.armToPos(x);
+
+
+        } else {
+          // If we have no targets, stay still.
+          manipulator.getArmEnc();
+        } */
+      }
     }
 
     /* Vision aiming section */
@@ -273,16 +267,13 @@ public class Robot extends TimedRobot {
         manipulator.shoot((m_manipController.getR2Axis() - 0.5) * 2);
       }
 
-    if (m_manipController.getR1Button()) {
+      if (m_manipController.getR1Button()) {
         // Run intake despite NOTE being in intake
         manipulator.intake(1.0);
-       
       }
-      } else {
-        manipulator.shoot(0.0);
-      }
-
-  
+    } else {
+      manipulator.shoot(0.0);
+    }
 
     /*Arm manual control*/
     if (m_manipController.getTriangleButtonPressed()) {
@@ -304,6 +295,5 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("Arm Target", curr_arm_target);
-    
   }
 }
