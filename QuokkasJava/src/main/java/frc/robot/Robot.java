@@ -55,8 +55,8 @@ public class Robot extends TimedRobot {
   final double LINEAR_D = 8;
   PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
 
-  final double ANGULAR_P = 10;
-  final double ANGULAR_D = 8;
+  final double ANGULAR_P = 0.0095;
+  final double ANGULAR_D = 0.002;
   PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
 
   @Override
@@ -128,6 +128,12 @@ public class Robot extends TimedRobot {
     double power;
     double steering;
 
+    power = m_driveController.getLeftY() * 0.6;
+
+      if (Math.abs(power) < 0.1) {
+        power = 0;
+      }
+
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
       // Vision-alignment mode
@@ -149,32 +155,21 @@ public class Robot extends TimedRobot {
         // Use this range as the measurement we give to the PID controller.
         // -1.0 required to ensure positive PID controller effort increases range
 
-        power =
-            forwardController.calculate(
-                range,
-                PhotonVisionConstants
-                    .GOAL_RANGE_METERS); // TODO: Change positive or negative by trying
-
-        // Also calculate angular power
-        // -1.0 required to ensure positive PID controller effort increases yaw
         steering =
-            turnController.calculate(
-                result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
+            -turnController.calculate(
+                result.getBestTarget().getYaw(),0);
+        
       } else {
         // If we have no targets, stay still.
-        power = 0;
         steering = 0;
+        
       }
     } else {
       // Manual Driver Mode
-      power = m_driveController.getRightX() * 0.6;
-      steering = m_driveController.getLeftY() * 0.6;
-
+      steering = m_driveController.getRightX() * 0.6;
+      
       if (Math.abs(steering) < 0.1) {
         steering = 0;
-      }
-      if (Math.abs(power) < 0.1) {
-        power = 0;
       }
     }
 
@@ -184,7 +179,7 @@ public class Robot extends TimedRobot {
 
     // read values periodically
     double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-    double shotAngle = -0.00000029436 * Math.pow(ty, 2) + 0.0006956 * ty + -0.6016;
+    double shotAngle = 0.00000008 * Math.pow(ty, 2) + 0.0000588899018* ty + 0.2242197194394;
     SmartDashboard.putNumber("shotAngle", shotAngle);
     SmartDashboard.putNumber("PhotonY", ty);
 
@@ -224,20 +219,8 @@ public class Robot extends TimedRobot {
         manipulator.shoot(0.25);
       } else {
 
-         
-        double err = -shotAngle + 0.765;
-        SmartDashboard.putNumber("err", err);
-        curr_arm_target = err;
+        curr_arm_target = shotAngle;
         // post to smart dashboard periodically
-       
-        /** High goal shooting, Set automatic shot angle */
-        // High goal shooting
-        // Set shot angle
-        // std::shared_ptr<nt::NetworkTable> table =
-        // nt::NetworkTableInstance::GetDefault().GetTable("limelight");
-        // double ty = table->GetNumber("ty", 0.0);
-        // double shot_angle = -0.00008 * pow(ty,2) + .00252*ty + .4992;
-        // this->curr_arm_target = shot_angle;
       }
     }
 
