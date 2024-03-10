@@ -5,26 +5,42 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.PS5ControllerPorts;
 import frc.robot.autonomous.Basic;
 import frc.robot.autonomous.MultiNote;
 import frc.robot.autonomous.SendIt;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
+
+import java.io.IOException;
+import java.nio.file.Path;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
 
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private final SendableChooser<String> test_chooser = new SendableChooser<>();
   private final String kAutoNameDefault = "Default";
   private final String kAutoNameCustom = "My Auto";
   private String m_autoSelected;
@@ -70,11 +86,50 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
+    test_chooser.addOption("curvy", object);
+    test_chooser.addOption("straight", object);
+
+    SmartDashboard.putData("Autonomous", test_chooser);
+    Shuffleboard.getTab("Autonomous").add(test_chooser);
+
     m_driveController = new PS5Controller(PS5ControllerPorts.DRIVETRAIN_PORT);
     m_manipController = new PS5Controller(PS5ControllerPorts.MANIPULATOR_PORT);
 
     camera = new PhotonCamera("Camera");
   }
+  public Command loadPathplannerTrajectroyToRamseteCommand(String filename, boolean resetOdometry){
+    Trajectory trajectory;
+    try{
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(filename);
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    }catch(IOException exception){
+      DriverStation.reportError("Unable to open trajectory "+ filename, exception.getStackTrace());
+      System.out.println("Unable to read from file " + filename);
+      return new InstantCommand();
+    }
+
+    RamseteCommand ramseteCommand = null;
+    // RamseteCommand ramseteCommand = new RamseteCommand(trajectory, drive::getPose, 
+    //   new RamseteController(0, 0),
+    //   new SimpleMotorFeedforward(0, 0, 0),
+    //   0, drive::getwWheelSpeeds,
+    //   new PIDController(0, 0, 0),
+    //   new PIDController(0, 0, 0), drive::driveVolts,
+    //   drive);
+    //   No se como hacer esto funcionar ---- REVISAR
+
+    if (resetOdometry){
+      return new SequentialCommandGroup(new InstantCommand(()->drive.resetOdometry(trajectory.getInitialPose())), ramseteCommand);
+    }
+    return null;
+  }
+  public Command getAutonomousCommand(){ // REVISAR
+    return //test_chooser.getSelected();
+    null;
+  }
+
+
+
 
   @Override
   public void robotPeriodic() {
