@@ -125,10 +125,6 @@ public class Robot extends TimedRobot {
     double power;
     double steering;
 
-    power = m_driveController.getLeftY() * 0.6;
-    if (Math.abs(power) < 0.1) {
-      power = 0;
-    }
 
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
@@ -167,12 +163,24 @@ public class Robot extends TimedRobot {
       }
     } else {
       // Manual Driver Mode
-      steering = m_driveController.getRightX() * 0.6;
-
+      if (m_driveController.getL2Axis() > 0.1) {
+        steering = m_driveController.getRightX() * 0.3;      
+      } else {
+        steering = m_driveController.getRightX() * 0.6;      
+      }
       if (Math.abs(steering) < 0.1) {
         steering = 0;
       }
     }
+
+    if (m_manipController.getL2Axis() > 0.1) {
+      power = m_driveController.getLeftY() * 0.3;
+    } else {
+      power = m_driveController.getLeftY() * 0.6;
+    }
+    if (Math.abs(power) < 0.1) {
+      power = 0; }
+       
 
     drive.move(power, steering);
 
@@ -194,7 +202,7 @@ public class Robot extends TimedRobot {
     } else if (m_manipController.getL1Button()) {
       // Outtake
       manipulator.intake(-1.0);
-      manipulator.shoot(-0.25);
+      manipulator.shoot(-0.35);
     } else {
       // do nothing
       manipulator.intake(0.0);
