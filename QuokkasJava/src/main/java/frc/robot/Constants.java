@@ -15,7 +15,6 @@ public class Constants {
   }
 
   public static class PhotonVisionConstants {
-    // TODO: Change Photon constants to Margarita
 
     /** Camera height stored. Change per robot and goal. */
     static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(7);

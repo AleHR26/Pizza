@@ -9,8 +9,7 @@ import frc.robot.subsystems.Manipulator;
 
 public class SendIt {
   private double st = 0; // start time, wrapped in an array
-  Manipulator manipulator =
-      new Manipulator(); // before: Manipulator manipulator = Manipulator.getInstance();
+  Manipulator manipulator = new Manipulator(); // before: Manipulator manipulator = Manipulator.getInstance();
   Drive drive = new Drive(); // before: Drive drive = new Drive.getInstance();
 
   public SendIt() {}

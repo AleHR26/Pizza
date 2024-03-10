@@ -47,10 +47,9 @@ public class Robot extends TimedRobot {
   private SendIt sendit;
 
   // PID constants should be tuned per robot
-  // TODO: Tune the PID.
-  final double LINEAR_P = 10;
+  /*final double LINEAR_P = 10;
   final double LINEAR_D = 8;
-  PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D);
+  PIDController forwardController = new PIDController(LINEAR_P, 0, LINEAR_D); */
 
   final double ANGULAR_P = 0.0095;
   final double ANGULAR_D = 0.002;
@@ -60,8 +59,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    curr_arm_target = Manipulator.kARM_START_POS; // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
-    // (manipulator.get())
+    curr_arm_target = Manipulator.kARM_START_POS; // (manipulator.getArmEnc())
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
     m_chooser.addOption("Basic", "Basic");
@@ -149,13 +147,13 @@ public class Robot extends TimedRobot {
 
         /*power =
             forwardController.calculate(
-                range, PhotonVisionConstants.GOAL_RANGE_METERS); // TODO: Change positive or negative by trying */
+                range, PhotonVisionConstants.GOAL_RANGE_METERS); */
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
         steering =
             -turnController.calculate(
-                result.getBestTarget().getYaw(), 0); // TODO: Change positive or negative by trying
+                result.getBestTarget().getYaw(), 0); 
       } else {
         // If we have no targets, stay still.
         // power = 0;
