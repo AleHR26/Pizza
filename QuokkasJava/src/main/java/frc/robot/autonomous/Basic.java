@@ -3,7 +3,7 @@ package frc.robot.autonomous;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drive;
 
-public class Basic extends Command {
+public class Basic{
 
   public Basic() {
     // Constructor logic (if any)

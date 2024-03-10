@@ -5,9 +5,8 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Drive extends SubsystemBase {
+public class Drive {
   // Crates motor objects
   private CANSparkMax L1 = new CANSparkMax(1, MotorType.kBrushless);
   private CANSparkMax L2 = new CANSparkMax(2, MotorType.kBrushless);

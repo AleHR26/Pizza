@@ -2,32 +2,32 @@ package frc.robot.autonomous;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Util.Util;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 
 public class SendIt {
-  private double st = 0; // start time, wrapped in an array
+  double autonomousStartTime; // start time, wrapped in an array
   Manipulator manipulator = new Manipulator(); // before: Manipulator manipulator = Manipulator.getInstance();
   Drive drive = new Drive(); // before: Drive drive = new Drive.getInstance();
 
-  public SendIt() {}
+  public SendIt() {
+    autonomousStartTime = Timer.getFPGATimestamp(); // Get current time in seconds
+    SmartDashboard.putNumber("start time", autonomousStartTime);
+  }
 
   public void run() {
-    st = System.currentTimeMillis() / 1000.0; // Get current time in seconds
-    SmartDashboard.putNumber("start time", st);
+    double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
-    SmartDashboard.putNumber("time", System.currentTimeMillis() / 1000.0);
-
-    if (Util.wait(st, 2)) {
-      manipulator.shoot(0.5);
-      manipulator.armToPos(0.545);
-    } else if (Util.wait(st, 4)) {
+    if (timeElapsed < 2) {
+      manipulator.shoot(0.3);
+      //manipulator.armToPos(0.253);
+    /* } else if (timeElapsed < 4) {
       manipulator.intake(1.0);
       manipulator.shoot(0.5);
       manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-    } else if (Util.wait(st, 5.5)) {
+    } else if (timeElapsed < 5.5) {
       if (manipulator.getNoteSensor()) {
         manipulator.intake(0.375);
       } else {
@@ -36,7 +36,7 @@ public class SendIt {
       manipulator.shoot(0.0);
       manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
       drive.gyroDrive(0.375, 0.0);
-    } else if (Util.wait(st, 7.0)) {
+    } else if (timeElapsed < 7) {
       manipulator.intake(0.0);
       manipulator.shoot(1.0);
 
@@ -48,7 +48,7 @@ public class SendIt {
       double tx = table.getEntry("tx").getDouble(0.0);
       double Kp = 0.05;
       drive.move(0.0, Kp * tx);
-    } else if (Util.wait(st, 9.0)) {
+    } else if (timeElapsed < 9.0) {
       manipulator.intake(1.0);
       manipulator.shoot(1.0);
 
@@ -60,7 +60,7 @@ public class SendIt {
       double tx = table.getEntry("tx").getDouble(0.0);
       double Kp = 0.05;
       drive.move(0.0, Kp * tx);
-    } else if (Util.wait(st, 11.0)) {
+    } else if (timeElapsed < 11.0) {
       if (manipulator.getNoteSensor()) {
         manipulator.intake(0.45);
       } else {
@@ -69,12 +69,12 @@ public class SendIt {
       manipulator.shoot(0.0);
       manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
       drive.gyroDrive(0.375, -90.0);
-    } else if (Util.wait(st, 12.0)) {
+    } else if (timeElapsed < 12.0) {
       manipulator.intake(0.0);
       manipulator.shoot(0.3);
       manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       drive.gyroDrive(0.0, -46.0);
-    } else if (Util.wait(st, 13.5)) {
+    } else if (timeElapsed < 13.5) {
       manipulator.intake(0.0);
       manipulator.shoot(1.0);
 
@@ -86,7 +86,7 @@ public class SendIt {
       double tx = table.getEntry("tx").getDouble(0.0);
       double Kp = 0.05;
       drive.move(0.0, Kp * tx);
-    } else if (Util.wait(st, 15.0)) {
+    } else if (timeElapsed < 15.0) {
       manipulator.intake(1.0);
       manipulator.shoot(1.0);
 
@@ -101,6 +101,7 @@ public class SendIt {
       manipulator.intake(0.0);
       manipulator.shoot(0.0);
       manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-    }
+    } */
   }
+}
 }

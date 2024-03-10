@@ -27,6 +27,9 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final String kAutoNameDefault = "Default";
   private final String kAutoNameCustom = "My Auto";
+  private static final String Sendit = "Sendit/3notes";
+  private static final String Multinote = "Multinote/2notes";
+  private static final String Basic = "Basic/drive";
   private String m_autoSelected;
   private PS5Controller m_manipController;
   private PS5Controller m_driveController;
@@ -76,15 +79,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    double matchTime = Timer.getMatchTime();
-    double currentTimeStamp = Timer.getFPGATimestamp();
-    double dt = currentTimeStamp - lastTimestamp;
-
-    lastTimestamp = currentTimeStamp;
+    SmartDashboard.putNumber("Time (seconds)", Timer.getFPGATimestamp());
   }
-
-  private boolean testinit;
-
+  
+  double autonomousStartTime;
   @Override
   public void autonomousInit() {
 
@@ -94,14 +92,13 @@ public class Robot extends TimedRobot {
     basic = new Basic();
     multinote = new MultiNote();
     sendit = new SendIt();
+
+    autonomousStartTime = Timer.getFPGATimestamp();
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (testinit) {
-      // drive.zeroGyro();
-      testinit = false;
-    }
+    double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
 
     if ("Basic".equals(m_autoSelected)) {
       basic.run();
