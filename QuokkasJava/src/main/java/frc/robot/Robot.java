@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.PS5ControllerPorts;
 import frc.robot.autonomous.Basic;
 import frc.robot.autonomous.MultiNote;
@@ -27,6 +29,9 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final String kAutoNameDefault = "Default";
   private final String kAutoNameCustom = "My Auto";
+  private static final String Sendit = "Sendit/3notes";
+  private static final String Multinote = "Multinote/2notes";
+  private static final String Basic = "Basic/drive";
   private String m_autoSelected;
   private PS5Controller m_manipController;
   private PS5Controller m_driveController;
@@ -40,7 +45,7 @@ public class Robot extends TimedRobot {
   private Manipulator manipulator; // Change variable name to match your class name
 
   private double curr_arm_target;
-
+  
   /* Autonomous Modes */
   private Basic basic;
   private MultiNote multinote;
@@ -54,11 +59,12 @@ public class Robot extends TimedRobot {
   final double ANGULAR_P = 0.0095;
   final double ANGULAR_D = 0.002;
   PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
+  Command auto ;
 
   @Override
   public void robotInit() {
-    drive = Drive.getInstance();
-    manipulator = Manipulator.getInstance();
+    drive = new Drive();
+    manipulator = new Manipulator();
     curr_arm_target = Manipulator.kARM_START_POS; // (manipulator.getArmEnc())
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameCustom);
@@ -76,15 +82,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    double matchTime = Timer.getMatchTime();
-    double currentTimeStamp = Timer.getFPGATimestamp();
-    double dt = currentTimeStamp - lastTimestamp;
-
-    lastTimestamp = currentTimeStamp;
+    //SmartDashboard.putNumber("Time (seconds)", Timer.getFPGATimestamp());
   }
-
-  private boolean testinit;
-
+  
+  double autonomousStartTime;
   @Override
   public void autonomousInit() {
 
@@ -94,98 +95,61 @@ public class Robot extends TimedRobot {
     basic = new Basic();
     multinote = new MultiNote();
     sendit = new SendIt();
+    if ("Basic".equals(m_autoSelected)) {
+      auto = basic;
+    } else if ("MultiNote".equals(m_autoSelected)) {
+      auto = multinote;
+    } else if ("SendIt".equals(m_autoSelected)) {
+      sendit.run();
+    } else {
+      auto = basic;
+    }
+    //autonomousStartTime = Timer.getFPGATimestamp();
+    if (auto != null){
+      auto.schedule();
+    }
+
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (testinit) {
-      // drive.zeroGyro();
-      testinit = false;
-    }
+    //double timeElapsed = Timer.getFPGATimestamp() - autonomousStartTime;
+    CommandScheduler.getInstance().run();
 
-    if ("Basic".equals(m_autoSelected)) {
-      basic.run();
-    } else if ("MultiNote".equals(m_autoSelected)) {
-      multinote.run();
-    } else if ("SendIt".equals(m_autoSelected)) {
-      sendit.run();
-    } else {
-      basic.run();
-    }
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
   @Override
   public void teleopPeriodic() {
     // Drive
-    double power;
-    double steering;
+    double power = 0;
+    double steering = 0;
 
-    // If square pressed, aligns
-    if (m_driveController.getSquareButton()) {
-      // Vision-alignment mode
-      // Query the latest result from PhotonVision
-      var result = camera.getLatestResult();
-      // Put the ID you want to follow or prioritize
-      // int targetID = target.getFiducialId();
-
-      // && targetID == 4
-      if (result.hasTargets()) {
-        // First calculate range
-        /*double range =
-            PhotonUtils.calculateDistanceToTargetMeters(
-                PhotonVisionConstants.CAMERA_HEIGHT_METERS,
-                PhotonVisionConstants.TARGET_HEIGHT_METERS,
-                PhotonVisionConstants.CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(result.getBestTarget().getPitch()));
-
-        // Use this range as the measurement we give to the PID controller.
-        // -1.0 required to ensure positive PID controller effort increases range
-
-        /*power =
-            forwardController.calculate(
-                range, PhotonVisionConstants.GOAL_RANGE_METERS); */
-
-        // Also calculate angular power
-        // -1.0 required to ensure positive PID controller effort increases yaw
-        steering = -turnController.calculate(result.getBestTarget().getYaw(), 0);
-      } else {
-        // If we have no targets, stay still.
-        // power = 0;
-        steering = 0;
-      }
-    } else {
-      // Manual Driver Mode
-      if (m_driveController.getL2Axis() > 0.1) {
-        steering = m_driveController.getRightX() * 0.3;
-      } else {
-        steering = m_driveController.getRightX() * 0.6;
-      }
-      if (Math.abs(steering) < 0.1) {
-        steering = 0;
-      }
-    }
-
-    if (m_manipController.getL2Axis() > 0.1) {
-      power = m_driveController.getLeftY() * 0.3;
-    } else {
+      
+    if (m_driveController.getL2Axis() > 0.1) {
       power = m_driveController.getLeftY() * 0.6;
+      steering = m_driveController.getRightX() * 0.6;
+      
+    } else {
+      power = m_driveController.getLeftY() * 0.3;
+      steering = m_driveController.getRightX() * 0.3;
     }
+
     if (Math.abs(power) < 0.1) {
-      power = 0;
-    }
+        power = 0;
+      }
+
+    if (Math.abs(steering) < 0.1) {
+        steering = 0;
+      }
+
 
     drive.move(power, steering);
 
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-
-    // read values periodically
-    double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-    double shotAngle = 0.00000008 * Math.pow(ty, 2) + 0.0000588899018 * ty + 0.2242197194394;
-    SmartDashboard.putNumber("shotAngle", shotAngle);
-    SmartDashboard.putNumber("PhotonY", ty);
 
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
@@ -197,7 +161,7 @@ public class Robot extends TimedRobot {
     } else if (m_manipController.getL1Button()) {
       // Outtake
       manipulator.intake(-1.0);
-      manipulator.shoot(-0.35);
+      manipulator.shoot(-0.25);
     } else {
       // do nothing
       manipulator.intake(0.0);
@@ -222,14 +186,34 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        /** High goal shooting, Set automatic shot angle */
-        curr_arm_target = shotAngle;
-      }
-    }
+         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+        // read values periodically
+        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+         double shotAngle = 0.0000000754886* Math.pow(ty, 2) + 0.0000615194497* ty + 0.2234508814813;
+         SmartDashboard.putNumber("shotAngle", shotAngle);
+         SmartDashboard.putNumber("PhotonY", ty);
 
-    if (m_manipController.getL2Axis() > 0.1) {
-      manipulator.intake(1.0);
-    }
+         curr_arm_target = shotAngle;
+        // post to smart dashboard periodically
+      }
+        var result = camera.getLatestResult();
+        // Put the ID you want to follow or prioritize
+        // int targetID = target.getFiducialId();
+  
+        // && targetID == 4
+        if (result.hasTargets()) {
+
+  
+          steering = -turnController.calculate(result.getBestTarget().getYaw(),0);
+         drive.move(power, steering);
+         SmartDashboard.putNumber("moveAngle", steering);
+
+     if (m_manipController.getL2Axis() > 0.1) {
+       manipulator.intake(1.0);
+     }
+
+        }
+      }
 
     if (m_manipController.getR2Axis() > 0.5) {
       // if arm turned back farther than starting config, score AMP
