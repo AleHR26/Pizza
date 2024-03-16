@@ -9,7 +9,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.Rev2mDistanceSensor;
 import com.revrobotics.Rev2mDistanceSensor.Port;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,8 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Manipulator extends SubsystemBase {
   private static Manipulator instance;
 
-  private DigitalInput input = new DigitalInput(1);
-  private DutyCycleEncoder armEnc = new DutyCycleEncoder(input);
+  private DutyCycleEncoder armEnc = new DutyCycleEncoder(1);
   private CANSparkMax armMotorLeft = new CANSparkMax(5, MotorType.kBrushless);
   private CANSparkMax armMotorRight = new CANSparkMax(6, MotorType.kBrushless);
 
@@ -95,7 +93,7 @@ public class Manipulator extends SubsystemBase {
 
   public void shoot(double power) {
     shooterMotorA.set(-power);
-    shooterMotorB.set(-power); 
+    shooterMotorB.set(-power);
   }
 
   public double getRange() {

@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
   private Manipulator manipulator; // Change variable name to match your class name
 
   private double curr_arm_target;
-  
+
   /* Autonomous Modes */
   private Basic basic;
   private MultiNote multinote;
@@ -123,7 +123,6 @@ public class Robot extends TimedRobot {
     double power;
     double steering;
 
-
     // If square pressed, aligns
     if (m_driveController.getSquareButton()) {
       // Vision-alignment mode
@@ -151,9 +150,7 @@ public class Robot extends TimedRobot {
 
         // Also calculate angular power
         // -1.0 required to ensure positive PID controller effort increases yaw
-        steering =
-            -turnController.calculate(
-                result.getBestTarget().getYaw(), 0); 
+        steering = -turnController.calculate(result.getBestTarget().getYaw(), 0);
       } else {
         // If we have no targets, stay still.
         // power = 0;
@@ -162,9 +159,9 @@ public class Robot extends TimedRobot {
     } else {
       // Manual Driver Mode
       if (m_driveController.getL2Axis() > 0.1) {
-        steering = m_driveController.getRightX() * 0.3;      
+        steering = m_driveController.getRightX() * 0.3;
       } else {
-        steering = m_driveController.getRightX() * 0.6;      
+        steering = m_driveController.getRightX() * 0.6;
       }
       if (Math.abs(steering) < 0.1) {
         steering = 0;
@@ -177,8 +174,8 @@ public class Robot extends TimedRobot {
       power = m_driveController.getLeftY() * 0.6;
     }
     if (Math.abs(power) < 0.1) {
-      power = 0; }
-       
+      power = 0;
+    }
 
     drive.move(power, steering);
 
@@ -186,7 +183,7 @@ public class Robot extends TimedRobot {
 
     // read values periodically
     double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-    double shotAngle = 0.00000008 * Math.pow(ty, 2) + 0.0000588899018* ty + 0.2242197194394;
+    double shotAngle = 0.00000008 * Math.pow(ty, 2) + 0.0000588899018 * ty + 0.2242197194394;
     SmartDashboard.putNumber("shotAngle", shotAngle);
     SmartDashboard.putNumber("PhotonY", ty);
 
