@@ -131,8 +131,8 @@ public class Robot extends TimedRobot {
 
       
     if (m_driveController.getL2Axis() > 0.1) {
-      power = m_driveController.getLeftY() * 0.6;
-      steering = m_driveController.getRightX() * 0.6;
+      power = m_driveController.getLeftY() * 0.8;
+      steering = m_driveController.getRightX() * 0.8;
       
     } else {
       power = m_driveController.getLeftY() * 0.3;
