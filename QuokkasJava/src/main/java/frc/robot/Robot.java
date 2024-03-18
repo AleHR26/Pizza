@@ -128,6 +128,21 @@ public class Robot extends TimedRobot {
     // Drive
     double power = 0;
     double steering = 0;
+    
+    if (m_driveController.getSquareButton()) {
+    var result = camera.getLatestResult();
+        // Put the ID you want to follow or prioritize
+        // int targetID = target.getFiducialId();
+  
+        // && targetID == 4
+        if (result.hasTargets()) {
+
+  
+          steering = -turnController.calculate(result.getBestTarget().getYaw(),0);
+         drive.move(power, steering);
+         SmartDashboard.putNumber("moveAngle", steering);
+    }
+  }
 
       
     if (m_driveController.getL2Axis() > 0.1) {
@@ -196,24 +211,11 @@ public class Robot extends TimedRobot {
          curr_arm_target = shotAngle;
         // post to smart dashboard periodically
       }
-        var result = camera.getLatestResult();
-        // Put the ID you want to follow or prioritize
-        // int targetID = target.getFiducialId();
-  
-        // && targetID == 4
-        if (result.hasTargets()) {
-
-  
-          steering = -turnController.calculate(result.getBestTarget().getYaw(),0);
-         drive.move(power, steering);
-         SmartDashboard.putNumber("moveAngle", steering);
-
-     if (m_manipController.getL2Axis() > 0.1) {
-       manipulator.intake(1.0);
      }
 
-        }
-      }
+     if (m_manipController.getL2Axis() > 0.1) {
+      manipulator.intake(1.0);
+    }
 
     if (m_manipController.getR2Axis() > 0.5) {
       // if arm turned back farther than starting config, score AMP

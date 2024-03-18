@@ -11,7 +11,7 @@ public class Constants {
 
   public class PS5ControllerPorts {
     static final int MANIPULATOR_PORT = 0;
-    static final int DRIVETRAIN_PORT = 0;
+    static final int DRIVETRAIN_PORT = 1;
   }
 
   public static class PhotonVisionConstants {
