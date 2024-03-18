@@ -3,11 +3,15 @@ package frc.robot.autonomous;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.PhotonVisionConstants;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 import java.util.List;
+import java.util.Optional;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -20,6 +24,7 @@ public class SendIt {
   PhotonTrackedTarget target;
   PIDController turnController =
       new PIDController(PhotonVisionConstants.ANGULAR_P, 0, PhotonVisionConstants.ANGULAR_D);
+  
 
   public SendIt() {
     autotime.start();
@@ -28,6 +33,27 @@ public class SendIt {
   }
 
   public void run() {
+
+    int ApriltagID = 0;
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+
+      ApriltagID = 4;
+       
+    }
+    if (ally.get() == Alliance.Blue) {
+
+      ApriltagID = 7;
+        
+    }
+    }
+    else {
+
+      ApriltagID = 7;
+    
+      }
     if (autotime.get() < 2) {
       manipulator.shoot(0.5);
       manipulator.armToPos(0.079);
@@ -60,7 +86,7 @@ public class SendIt {
         List<PhotonTrackedTarget> targets = result.getTargets();
 
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
@@ -83,7 +109,7 @@ public class SendIt {
         List<PhotonTrackedTarget> targets = result.getTargets();
 
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
@@ -120,7 +146,7 @@ public class SendIt {
         List<PhotonTrackedTarget> targets = result.getTargets();
 
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
@@ -144,7 +170,7 @@ public class SendIt {
         List<PhotonTrackedTarget> targets = result.getTargets();
 
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }

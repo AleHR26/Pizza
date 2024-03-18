@@ -4,8 +4,12 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 
 /** Add your docs here. */
@@ -17,6 +21,25 @@ public class Constants {
   }
 
   public static class PhotonVisionConstants {
+
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+       
+    }
+    if (ally.get() == Alliance.Blue) {
+        
+    }
+    }
+    else {
+    
+      }
+
+
+
+
+
     // TODO: Change Photon constants to Margarita
 
     /** Camera height stored. Change per robot and goal. */
@@ -35,6 +58,8 @@ public class Constants {
     public static final double ANGULAR_D = 0.0;
 
     public static final Timer autotime = new Timer();
+    
+
   }
 
   public static class DrivetrainConstants {

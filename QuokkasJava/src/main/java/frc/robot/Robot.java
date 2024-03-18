@@ -8,6 +8,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -17,12 +19,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.PS5ControllerPorts;
 import frc.robot.Constants.PhotonVisionConstants;
+import frc.robot.autonomous.MultiNote;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 import java.util.List;
+import java.util.Optional;
+
 import org.littletonrobotics.urcl.URCL;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import frc.robot.autonomous.Basic;
+import frc.robot.autonomous.SendIt;
 
 public class Robot extends TimedRobot {
 
@@ -40,10 +47,14 @@ public class Robot extends TimedRobot {
   /* Mechanisms */
   private Drive drive;
   private Manipulator manipulator; // Change variable name to match your class name
-
   private double curr_arm_target;
 
   private Timer autotime = PhotonVisionConstants.autotime;
+   /* Autonomous Modes */
+   private Basic basic;
+   private MultiNote multinote;
+   private SendIt sendit;
+
 
   // PID constants should be tuned per robot
   // TODO: Tune the PID.
@@ -93,207 +104,30 @@ public class Robot extends TimedRobot {
 
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
+    basic = new Basic();
+    multinote = new MultiNote();
+    sendit = new SendIt();
     drive.zeroGyro();
     autotime.reset();
   }
 
   @Override
   public void autonomousPeriodic() {
+    if (testinit) {
+      //drive.zeroGyro();
+      testinit = false;
+    }
 
     if ("Basic".equals(m_autoSelected)) {
-
-      if (autotime.get() < 2.5) {
-        manipulator.shoot(1);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      } else if (autotime.get() < 3) {
-        manipulator.intake(1);
-        manipulator.shoot(0.5);
-      } else if (autotime.get() < 5) {
-        drive.gyroDrive(0.3, 0.0);
-      } else {
-        drive.gyroDrive(0.0, 0.0);
-      }
-
+    basic.run();
     } else if ("MultiNote".equals(m_autoSelected)) {
-
-      if (autotime.get() < 2.0) {
-        // Lower arm
-        manipulator.shoot(1);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      } else if (autotime.get() < 4.0) {
-        // Shoot
-        manipulator.intake(1.0);
-        manipulator.shoot(0.5);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      } else if (autotime.get() < 5.5) {
-        // Drive, intake
-        if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
-        } else {
-          manipulator.intake(0.0);
-        }
-        manipulator.shoot(0.0);
-        manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, 0.0);
-
-      } else if (autotime.get() < 6.5) {
-        drive.gyroDrive(0.0, 0.0);
-
-      } else if (autotime.get() < 7.0) {
-        // Drive back
-        manipulator.intake(0.0);
-        manipulator.shoot(0.5);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(-0.45, 0.0);
-      } else if (autotime.get() < 10) {
-        // Drive back
-        manipulator.intake(1.0);
-        manipulator.shoot(0.5);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(0.0, 0.0);
-      } else {
-        // Finally,
-        drive.move(0.0, 0.0); // Stop
-        manipulator.intake(0.0);
-        manipulator.shoot(0.0);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      }
-
+    multinote.run();
     } else if ("SendIt".equals(m_autoSelected)) {
-
-      if (autotime.get() < 2) {
-        manipulator.shoot(0.5);
-        manipulator.armToPos(0.079);
-      } else if (autotime.get() < 4) {
-        manipulator.intake(1.0);
-        manipulator.shoot(0.5);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      } else if (autotime.get() < 5.5) {
-        if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
-        } else {
-          manipulator.intake(0.0);
-        }
-        manipulator.shoot(0.0);
-        manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, 0.0);
-      } else if (autotime.get() < 7.0) {
-        manipulator.intake(0.0);
-        manipulator.shoot(1.0);
-
-        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
-        manipulator.armToPos(shot_angle);
-
-        var result = camera.getLatestResult();
-        double goalTarget = 0;
-
-        if (result.hasTargets()) {
-          List<PhotonTrackedTarget> targets = result.getTargets();
-
-          for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
-            {
-              goalTarget = targets.get(i).getYaw();
-            }
-          }
-          drive.move(0, -turnController.calculate(goalTarget, 0));
-        }
-      } else if (autotime.get() < 9.0) {
-        manipulator.intake(1.0);
-        manipulator.shoot(1.0);
-
-        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
-        manipulator.armToPos(shot_angle);
-
-        var result = camera.getLatestResult();
-        double goalTarget = 0;
-
-        if (result.hasTargets()) {
-          List<PhotonTrackedTarget> targets = result.getTargets();
-
-          for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
-            {
-              goalTarget = targets.get(i).getYaw();
-            }
-          }
-          drive.move(0, -turnController.calculate(goalTarget, 0));
-        }
-      } else if (autotime.get() < 11.0) {
-        if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.45);
-        } else {
-          manipulator.intake(0.0);
-        }
-        manipulator.shoot(0.0);
-        manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, -90.0);
-      } else if (autotime.get() < 12.0) {
-        manipulator.intake(0.0);
-        manipulator.shoot(0.3);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(0.0, -46.0);
-      } else if (autotime.get() < 13.5) {
-        manipulator.intake(0.0);
-        manipulator.shoot(1.0);
-
-        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
-        manipulator.armToPos(shot_angle);
-
-        var result = camera.getLatestResult();
-        double goalTarget = 0;
-
-        if (result.hasTargets()) {
-          List<PhotonTrackedTarget> targets = result.getTargets();
-
-          for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
-            {
-              goalTarget = targets.get(i).getYaw();
-            }
-          }
-          drive.move(0, -turnController.calculate(goalTarget, 0));
-        }
-      } else if (autotime.get() < 15.0) {
-        manipulator.intake(1.0);
-        manipulator.shoot(1.0);
-
-        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
-        manipulator.armToPos(shot_angle);
-        // manipulator.armToPos(0.024);
-
-        var result = camera.getLatestResult();
-        double goalTarget = 0;
-
-        if (result.hasTargets()) {
-          List<PhotonTrackedTarget> targets = result.getTargets();
-
-          for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
-            {
-              goalTarget = targets.get(i).getYaw();
-            }
-          }
-          drive.move(0, -turnController.calculate(goalTarget, 0));
-        }
-      } else {
-        drive.move(0.0, 0.0);
-        manipulator.intake(0.0);
-        manipulator.shoot(0.0);
-        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-      }
-
+    sendit.run();
     } else {
-      drive.gyroDrive(0.25, 0.0);
+    basic.run();;
     }
+
   }
 
   @Override
@@ -303,6 +137,28 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+
+    int ApriltagID = 0;
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+
+      ApriltagID = 4;
+       
+    }
+    if (ally.get() == Alliance.Blue) {
+
+      ApriltagID = 7;
+        
+    }
+    }
+    else {
+      ApriltagID = 7;
+    
+      }
+
+    
 
     drive.m_drivetrain.feed();
 
@@ -405,7 +261,7 @@ public class Robot extends TimedRobot {
       // Put the ID you want to follow or prioritize
       // int targetID = target.getFiducialId();
 
-      // && targetID == 4
+      // && targetID == ApriltagID
       double goalTarget = 0;
 
       if (result.hasTargets()) {
@@ -413,7 +269,7 @@ public class Robot extends TimedRobot {
         // int i = 0;
 
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
