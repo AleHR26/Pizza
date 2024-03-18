@@ -158,8 +158,6 @@ public class Robot extends TimedRobot {
     
       }
 
-    
-
     drive.m_drivetrain.feed();
 
     if (m_driveController.getCrossButton()) {

@@ -50,7 +50,6 @@ public class SendIt {
     }
     }
     else {
-
       ApriltagID = 7;
     
       }

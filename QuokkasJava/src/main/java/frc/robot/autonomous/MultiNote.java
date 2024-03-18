@@ -21,6 +21,8 @@ public class MultiNote {
   }
 
   public void run() {
+
+    
     if (autotime.get() < 2.0) {
       // Lower arm
       manipulator.shoot(1);
