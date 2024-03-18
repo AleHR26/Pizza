@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -20,20 +19,18 @@ import frc.robot.Constants.PhotonVisionConstants;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 import java.util.List;
-import org.littletonrobotics.urcl.URCL;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Robot extends TimedRobot {
 
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private final SendableChooser<String> m_IDchooser = new SendableChooser<>();
   private final String kAutoNameDefault = "Default";
-  private final String kAutoNameCustom = "My Auto";
   private String m_autoSelected;
+  private String m_TargetID;
   private PS5Controller m_manipController;
   private PS5Controller m_driveController;
-  private Timer autoTimer;
-  private double lastTimestamp; // Add this line for missing variable
 
   PhotonCamera camera;
   PhotonTrackedTarget target;
@@ -47,7 +44,6 @@ public class Robot extends TimedRobot {
 
   // PID constants should be tuned per robot
   // TODO: Tune the PID.
-
   PIDController turnController =
       new PIDController(PhotonVisionConstants.ANGULAR_P, 0, PhotonVisionConstants.ANGULAR_D);
 
@@ -55,13 +51,17 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    curr_arm_target = Manipulator.kARM_START_POS; // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
-    // (manipulator.get())
+    curr_arm_target = Manipulator.kARM_START_POS; 
+    // (manipulator.getArmEnc()) put this code for NOT going into the desired position
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameDefault);
     m_chooser.addOption("Basic", "Basic");
     m_chooser.addOption("MultiNote", "MultiNote");
     m_chooser.addOption("SendIt", "SendIt");
+
+    m_IDchooser.setDefaultOption(kAutoNameDefault, kAutoNameDefault);
+    m_IDchooser.addOption("4", "4");
+    m_IDchooser.addOption("7", "7");
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
@@ -70,22 +70,12 @@ public class Robot extends TimedRobot {
 
     camera = new PhotonCamera("Camera");
     drive.zeroGyro();
-
-    DataLogManager.start();
-    URCL.start();
   }
 
   @Override
   public void robotPeriodic() {
-    double matchTime = Timer.getMatchTime();
-    double currentTimeStamp = Timer.getFPGATimestamp();
-    double dt = currentTimeStamp - lastTimestamp;
     SmartDashboard.putNumber("Gyro", drive.getGyroAngle());
-
-    lastTimestamp = currentTimeStamp;
   }
-
-  private boolean testinit;
 
   @Override
   public void autonomousInit() {
@@ -93,7 +83,9 @@ public class Robot extends TimedRobot {
 
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
+    
     drive.zeroGyro();
+
     autotime.reset();
   }
 
@@ -298,6 +290,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+
+    m_TargetID = m_IDchooser.getSelected();
+    System.out.println("Target ID: " + m_TargetID);
+
     drive.zeroGyro();
   }
 
@@ -377,6 +373,8 @@ public class Robot extends TimedRobot {
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
+    
+
     /* Shooter */
     if (m_manipController.getR2Axis() > 0.1) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
@@ -403,17 +401,22 @@ public class Robot extends TimedRobot {
       }
       var result = camera.getLatestResult();
       // Put the ID you want to follow or prioritize
-      // int targetID = target.getFiducialId();
-
-      // && targetID == 4
       double goalTarget = 0;
+      int ID = 4;
+
+      if ("4".equals(m_TargetID)) {
+      ID = 4;
+      }
+
+      if ("7".equals(m_TargetID)) {
+      ID = 7;
+      }
 
       if (result.hasTargets()) {
         List<PhotonTrackedTarget> targets = result.getTargets();
-        // int i = 0;
-
+      
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
