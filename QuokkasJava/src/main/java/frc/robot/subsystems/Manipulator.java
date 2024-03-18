@@ -25,7 +25,6 @@ public class Manipulator {
   public static Rev2mDistanceSensor noteSensor = new Rev2mDistanceSensor(Port.kOnboard);
   private CANSparkMax intakeMotor = new CANSparkMax(9, MotorType.kBrushless);
 
-  // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
   public static final double kARM_FLOOR_POS = 0.0175; // intaking 0.181
   public static final double kARM_FENDER_POS = 0.064; // close shot 0.235
   public static final double kARM_START_POS = 0.23; // start config 0.376
@@ -93,7 +92,7 @@ public class Manipulator {
 
   public void shoot(double power) {
     shooterMotorA.set(-power);
-    shooterMotorB.set(-power); // TODO: check polarities
+    shooterMotorB.set(-power); 
   }
 
   public double getRange() {

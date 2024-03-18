@@ -17,8 +17,6 @@ public class Constants {
   }
 
   public static class PhotonVisionConstants {
-    // TODO: Change Photon constants to Margarita
-
     /** Camera height stored. Change per robot and goal. */
     static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(20);
 
@@ -30,7 +28,8 @@ public class Constants {
 
     /** How far from the target we want to be */
     static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
-
+    
+    // TODO: Tune the PID.
     public static final double ANGULAR_P = 0.0095;
     public static final double ANGULAR_D = 0.0;
 

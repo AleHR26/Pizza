@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -19,6 +21,8 @@ import frc.robot.Constants.PhotonVisionConstants;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Manipulator;
 import java.util.List;
+import java.util.Optional;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -43,7 +47,6 @@ public class Robot extends TimedRobot {
   private Timer autotime = PhotonVisionConstants.autotime;
 
   // PID constants should be tuned per robot
-  // TODO: Tune the PID.
   PIDController turnController =
       new PIDController(PhotonVisionConstants.ANGULAR_P, 0, PhotonVisionConstants.ANGULAR_D);
 
@@ -74,7 +77,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Gyro", drive.getGyroAngle());
+    SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
+    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
+    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
   }
 
   @Override
@@ -91,6 +96,26 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
+    
+    int ApriltagID = 0;
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+
+      ApriltagID = 4;
+       
+    }
+    if (ally.get() == Alliance.Blue) {
+
+      ApriltagID = 7;
+        
+    }
+    }
+    else {
+      ApriltagID = 7;
+    
+      }
 
     if ("Basic".equals(m_autoSelected)) {
 
@@ -185,7 +210,7 @@ public class Robot extends TimedRobot {
           List<PhotonTrackedTarget> targets = result.getTargets();
 
           for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+            if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
             {
               goalTarget = targets.get(i).getYaw();
             }
@@ -208,7 +233,7 @@ public class Robot extends TimedRobot {
           List<PhotonTrackedTarget> targets = result.getTargets();
 
           for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+            if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
             {
               goalTarget = targets.get(i).getYaw();
             }
@@ -245,7 +270,7 @@ public class Robot extends TimedRobot {
           List<PhotonTrackedTarget> targets = result.getTargets();
 
           for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+            if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
             {
               goalTarget = targets.get(i).getYaw();
             }
@@ -269,7 +294,7 @@ public class Robot extends TimedRobot {
           List<PhotonTrackedTarget> targets = result.getTargets();
 
           for (int i = 0; i < targets.size(); i++) {
-            if (targets.get(i).getFiducialId() == 4) // change to 7 for blue side
+            if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
             {
               goalTarget = targets.get(i).getYaw();
             }
@@ -299,6 +324,25 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+     int ApriltagID = 0;
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+
+      ApriltagID = 4;
+       
+    }
+    if (ally.get() == Alliance.Blue) {
+
+      ApriltagID = 7;
+        
+    }
+    }
+    else {
+      ApriltagID = 7;
+    
+      }
 
     drive.m_drivetrain.feed();
 
@@ -402,21 +446,12 @@ public class Robot extends TimedRobot {
       var result = camera.getLatestResult();
       // Put the ID you want to follow or prioritize
       double goalTarget = 0;
-      int ID = 4;
-
-      if ("4".equals(m_TargetID)) {
-      ID = 4;
-      }
-
-      if ("7".equals(m_TargetID)) {
-      ID = 7;
-      }
 
       if (result.hasTargets()) {
         List<PhotonTrackedTarget> targets = result.getTargets();
       
         for (int i = 0; i < targets.size(); i++) {
-          if (targets.get(i).getFiducialId() == ID) // change to 7 for blue side
+          if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
           {
             goalTarget = targets.get(i).getYaw();
           }
@@ -467,9 +502,6 @@ public class Robot extends TimedRobot {
       manipulator.armToPos(curr_arm_target);
     }
 
-    SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
-    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
-    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("Arm Target", curr_arm_target);
   }
 }
