@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     SmartDashboard.putNumber("Gyro", drive.getGyroAngle());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
-    SmartDashboard.putNumber("Arm Target", curr_arm_target);
+    SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
   }
 
   @Override
@@ -305,6 +305,6 @@ public class Robot extends TimedRobot {
       manipulator.armToPos(curr_arm_target);
     }
 
-    SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
+    SmartDashboard.putNumber("Arm Target", curr_arm_target);
   }
 }
