@@ -35,12 +35,9 @@ public class Robot extends TimedRobot {
 
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final String kAutoNameDefault = "Default";
-  private final String kAutoNameCustom = "My Auto";
   private String m_autoSelected;
   private PS5Controller m_manipController;
   private PS5Controller m_driveController;
-  private Timer autoTimer;
-  private double lastTimestamp; // Add this line for missing variable
 
   PhotonCamera camera;
   PhotonTrackedTarget target;
@@ -55,10 +52,7 @@ public class Robot extends TimedRobot {
    private MultiNote multinote;
    private SendIt sendit;
 
-
   // PID constants should be tuned per robot
-  // TODO: Tune the PID.
-
   PIDController turnController =
       new PIDController(PhotonVisionConstants.ANGULAR_P, 0, PhotonVisionConstants.ANGULAR_D);
 
@@ -66,8 +60,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
-    curr_arm_target = Manipulator.kARM_START_POS; // TODO: CONFIGURE THE POSITIONS FOR THE ENCODER
-    // (manipulator.get())
+    curr_arm_target = Manipulator.kARM_START_POS;
+    // (manipulator.getArmEnc()) put this code for NOT going into the desired position
 
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameDefault);
     m_chooser.addOption("Basic", "Basic");
@@ -88,15 +82,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    double matchTime = Timer.getMatchTime();
-    double currentTimeStamp = Timer.getFPGATimestamp();
-    double dt = currentTimeStamp - lastTimestamp;
     SmartDashboard.putNumber("Gyro", drive.getGyroAngle());
+    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
+    SmartDashboard.putNumber("Arm Target", curr_arm_target);
 
-    lastTimestamp = currentTimeStamp;
+
   }
-
-  private boolean testinit;
 
   @Override
   public void autonomousInit() {
@@ -104,20 +95,18 @@ public class Robot extends TimedRobot {
 
     m_autoSelected = m_chooser.getSelected();
     System.out.println("Auto selected: " + m_autoSelected);
+
     basic = new Basic();
     multinote = new MultiNote();
     sendit = new SendIt();
+
     drive.zeroGyro();
+
     autotime.reset();
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (testinit) {
-      //drive.zeroGyro();
-      testinit = false;
-    }
-
     if ("Basic".equals(m_autoSelected)) {
     basic.run();
     } else if ("MultiNote".equals(m_autoSelected)) {
@@ -319,8 +308,5 @@ public class Robot extends TimedRobot {
     }
 
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
-    SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
-    SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
-    SmartDashboard.putNumber("Arm Target", curr_arm_target);
   }
 }
