@@ -85,8 +85,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Gyro", drive.getGyroAngle());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Arm Target", curr_arm_target);
-
-
   }
 
   @Override
