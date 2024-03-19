@@ -62,7 +62,8 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("MultiNote", "MultiNote");
     m_chooser.addOption("leftMultiNote", "leftMultiNote");
     m_chooser.addOption("SendIt", "SendIt");
-     m_chooser.addOption("leftMultiNote", "leftMultiNote");
+    m_chooser.addOption("leftMultiNote", "leftMultiNote");
+    m_chooser.addOption("rightMultiNote", "rightMultiNote");
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
@@ -107,8 +108,8 @@ public class Robot extends TimedRobot {
     Optional<Alliance> ally = DriverStation.getAlliance();
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
-
-      ApriltagID = 5;
+      
+      ApriltagID = 3;
 
       direction = -1; //Ajustar este valor si va a la direccion incorrecta con 1
       
@@ -127,7 +128,8 @@ public class Robot extends TimedRobot {
       }
       double pos = drive.getEncodersPosition();
        SmartDashboard.putNumber("pos", pos);
-
+    
+       /* BASIC */
     if ("Basic".equals(m_autoSelected)) {
 
       if (autotime.get() < 2.5) {
@@ -142,7 +144,7 @@ public class Robot extends TimedRobot {
         drive.gyroDrive(0.0, 0.0);
       }
 
-
+      /* MULTINOTE */
     } else if ("MultiNote".equals(m_autoSelected)) {
 
       if (autotime.get() < 2.0) {
@@ -188,7 +190,8 @@ public class Robot extends TimedRobot {
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       }
-
+    
+      /* SEND IT */
     } else if ("SendIt".equals(m_autoSelected)) {
 
        if (autotime.get() < 2.0) {
@@ -305,7 +308,6 @@ public class Robot extends TimedRobot {
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
         double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         manipulator.armToPos(shot_angle);
-        // manipulator.armToPos(0.024);
 
         var result = camera.getLatestResult();
         double goalTarget = 0;
@@ -328,6 +330,7 @@ public class Robot extends TimedRobot {
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       }
 
+      /* LEFT MULTINOTE */
       } else if ("leftMultiNote".equals(m_autoSelected)) {
 
         if (autotime.get() < 1.5) {
@@ -350,9 +353,9 @@ public class Robot extends TimedRobot {
         }
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.2, 62);
+        drive.gyroDrive(0.2, 62*direction);
       } else if (autotime.get() < 7.0) {
-        drive.gyroDrive(0.0, 30);
+        drive.gyroDrive(0.0, 30*direction);
       } else if  (autotime.get() < 10.0) {
 
         manipulator.intake(0.0);
@@ -376,12 +379,112 @@ public class Robot extends TimedRobot {
             }
           }
           drive.move(0, -turnController.calculate(goalTarget, 0));
+        }
+      } else if (autotime.get() < 13) {
+        manipulator.intake(1.0);
+        manipulator.shoot(1.0);
+
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+        double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
+        manipulator.armToPos(shot_angle);
+        // manipulator.armToPos(0.024);
+
+        var result = camera.getLatestResult();
+        double goalTarget = 0;
+
+        if (result.hasTargets()) {
+          List<PhotonTrackedTarget> targets = result.getTargets();
+
+          for (int i = 0; i < targets.size(); i++) {
+            if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
+            {
+              goalTarget = targets.get(i).getYaw();
+            }
+          }
+          drive.move(0, -turnController.calculate(goalTarget, 0));
+       } 
+   } 
+   /* RIGHT MULTINOTE */
+  } else if ("rightMultiNote".equals(m_autoSelected)) {
+
+    if (autotime.get() < 1.5) {
+    manipulator.shoot(1);
+    manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+  } else if (autotime.get() < 3){
+     manipulator.intake(1.0);
+    manipulator.shoot(0.5);
+    manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+     if (pos >= 0.4) {
+    drive.gyroDrive(0.0, 0);
+  } else {
+     drive.gyroDrive(0.3, 0);
+   } 
+  } else if (autotime.get() < 5.0) {
+    if (manipulator.getNoteSensor()) {
+      manipulator.intake(0.375);
     } else {
-      drive.gyroDrive(0.25, 0.0);
+      manipulator.intake(0.0);
     }
-  }
-  }
-  }
+    manipulator.shoot(0.0);
+    manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
+    drive.gyroDrive(0.2, -62*direction);
+  } else if (autotime.get() < 7.0) {
+    drive.gyroDrive(0.0, -30*direction);
+  } else if  (autotime.get() < 10.0) {
+
+    manipulator.intake(0.0);
+    manipulator.shoot(1.0);
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+    double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+    double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
+    manipulator.armToPos(shot_angle);
+
+    var result = camera.getLatestResult();
+    double goalTarget = 0;
+
+    if (result.hasTargets()) {
+      List<PhotonTrackedTarget> targets = result.getTargets();
+
+      for (int i = 0; i < targets.size(); i++) {
+        if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
+        {
+          goalTarget = targets.get(i).getYaw();
+        }
+      }
+      drive.move(0, -turnController.calculate(goalTarget, 0));
+    }
+  } else if (autotime.get() < 13) {
+    manipulator.intake(1.0);
+    manipulator.shoot(1.0);
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+    double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+    double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
+    manipulator.armToPos(shot_angle);
+    // manipulator.armToPos(0.024);
+
+    var result = camera.getLatestResult();
+    double goalTarget = 0;
+
+    if (result.hasTargets()) {
+      List<PhotonTrackedTarget> targets = result.getTargets();
+
+      for (int i = 0; i < targets.size(); i++) {
+        if (targets.get(i).getFiducialId() == ApriltagID) // change to 7 for blue side
+        {
+          goalTarget = targets.get(i).getYaw();
+        }
+      }
+      drive.move(0, -turnController.calculate(goalTarget, 0));
+   } 
+} 
+  } else {
+  drive.gyroDrive(0.2, 0.0);
+ }
+} 
+ 
 
   @Override
   public void teleopInit() {
