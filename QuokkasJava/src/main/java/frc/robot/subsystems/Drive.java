@@ -56,10 +56,10 @@ public class Drive extends SubsystemBase {
     L2.setIdleMode(IdleMode.kBrake);
     R1.setIdleMode(IdleMode.kBrake);
     R2.setIdleMode(IdleMode.kBrake);
-    L1.setSmartCurrentLimit(60);
-    L2.setSmartCurrentLimit(60);
-    R1.setSmartCurrentLimit(60);
-    R2.setSmartCurrentLimit(60);
+    L1.setSmartCurrentLimit(40);
+    L2.setSmartCurrentLimit(40);
+    R1.setSmartCurrentLimit(40);
+    R2.setSmartCurrentLimit(40);
 
     // L2.setInverted(true);
     // R2.setInverted(false);
@@ -67,7 +67,7 @@ public class Drive extends SubsystemBase {
     // L1.follow(L2);
     // R1.follow(R2);
 
-    m_drivetrain = new DifferentialDrive(L1, R1);
+    //m_drivetrain = new DifferentialDrive(L1, R1);
 
     leftEncoder.setPosition(0);
     RightEncoder.setPosition(0);
@@ -83,9 +83,9 @@ public class Drive extends SubsystemBase {
     resetEncoders();
 
     // Creates differential drive
-    m_odometry =
-        new DifferentialDriveOdometry(
-            navx.getRotation2d(), leftEncoder.getPosition(), RightEncoder.getPosition());
+   // m_odometry =
+      //  new DifferentialDriveOdometry(
+          //  navx.getRotation2d(), leftEncoder.getPosition(), RightEncoder.getPosition());
 
     xPIDController = new PIDController(kPXController, kIXController, kDXController);
     yawPIDController = new PIDController(kPYawController, KIYawController, kDYawController);
@@ -136,12 +136,19 @@ public class Drive extends SubsystemBase {
     RightEncoder.setPosition(0);
   }
 
+ 
   public double getRightEncoderPosition() {
     return RightEncoder.getPosition();
   }
 
   public double getleftEncoderPosition() {
     return leftEncoder.getPosition();
+  }
+
+  public double getEncodersPosition(){
+   double position = (RightEncoder.getPosition() +leftEncoder.getPosition())/2;
+   return position;
+
   }
 
   public double getRightEncoderVelocity() {
@@ -184,7 +191,7 @@ public class Drive extends SubsystemBase {
 
   // Drive with the gyro
   public void gyroDrive(double maxSpeed, double heading) {
-    double Kp = 0.015;
+    double Kp = 0.008;
     double error = heading - navx.getAngle();
     double steering = Kp * error;
     move(maxSpeed, steering);
@@ -192,6 +199,17 @@ public class Drive extends SubsystemBase {
     SmartDashboard.putNumber("error", error);
     SmartDashboard.putNumber("heading", heading);
   }
+
+    public void setEncoders(double maxSpeed, double position) {
+      double kp = 0.01;
+      double error = position - (RightEncoder.getPosition() +leftEncoder.getPosition())/2;
+      double distance= kp*error;
+      move(maxSpeed, distance);
+   SmartDashboard.putNumber("distance", distance);
+    SmartDashboard.putNumber("error", error);
+    SmartDashboard.putNumber("position", position);
+  }
+
 
   public double getTurnRate() {
     return -navx.getRate();

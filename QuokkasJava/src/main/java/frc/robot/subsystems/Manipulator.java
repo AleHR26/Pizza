@@ -39,16 +39,19 @@ public class Manipulator {
     // shooterMotorB.follow(shooterMotorA);
 
     intakeMotor.setSmartCurrentLimit(20);
-    armMotorRight.setSmartCurrentLimit(60);
-    armMotorLeft.setSmartCurrentLimit(60);
-    shooterMotorA.setSmartCurrentLimit(60);
-    shooterMotorB.setSmartCurrentLimit(60);
+    armMotorRight.setSmartCurrentLimit(40);
+    armMotorLeft.setSmartCurrentLimit(40);
+    shooterMotorA.setSmartCurrentLimit(40);
+    shooterMotorB.setSmartCurrentLimit(40);
 
     intakeMotor.setIdleMode(IdleMode.kBrake);
     armMotorLeft.setIdleMode(IdleMode.kBrake);
     armMotorLeft.setOpenLoopRampRate(0.25);
     armMotorRight.setIdleMode(IdleMode.kBrake);
     armMotorRight.setOpenLoopRampRate(0.25);
+
+    shooterMotorA.setIdleMode(IdleMode.kBrake);
+    shooterMotorB.setIdleMode(IdleMode.kBrake);
 
     noteSensor.setAutomaticMode(true);
   }
@@ -100,7 +103,7 @@ public class Manipulator {
   }
 
   public boolean getNoteSensor() {
-    if (noteSensor.getRange() > 3) {
+    if (noteSensor.getRange() > 4) {
       return true;
     } else {
       return false;

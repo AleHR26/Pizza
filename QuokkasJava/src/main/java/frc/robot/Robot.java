@@ -60,11 +60,8 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption(kAutoNameDefault, kAutoNameDefault);
     m_chooser.addOption("Basic", "Basic");
     m_chooser.addOption("MultiNote", "MultiNote");
+    m_chooser.addOption("leftMultiNote", "leftMultiNote");
     m_chooser.addOption("SendIt", "SendIt");
-
-    m_IDchooser.setDefaultOption(kAutoNameDefault, kAutoNameDefault);
-    m_IDchooser.addOption("4", "4");
-    m_IDchooser.addOption("7", "7");
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
@@ -80,6 +77,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
+    SmartDashboard.putNumber("Encoders", drive.getEncodersPosition());
+   
   }
 
   @Override
@@ -90,7 +89,7 @@ public class Robot extends TimedRobot {
     System.out.println("Auto selected: " + m_autoSelected);
     
     drive.zeroGyro();
-
+    drive.resetEncoders();
     autotime.reset();
   }
 
@@ -103,23 +102,25 @@ public class Robot extends TimedRobot {
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
 
-      ApriltagID = 4;
+      ApriltagID = 5;
        
     }
     if (ally.get() == Alliance.Blue) {
 
-      ApriltagID = 7;
+      ApriltagID = 8;
         
     }
     }
     else {
-      ApriltagID = 7;
+      ApriltagID = 8;
     
       }
+      double pos = drive.getEncodersPosition();
+       SmartDashboard.putNumber("pos", pos);
 
     if ("Basic".equals(m_autoSelected)) {
 
-      if (autotime.get() < 2.5) {
+      /*if (autotime.get() < 2.5) {
         manipulator.shoot(1);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       } else if (autotime.get() < 3) {
@@ -129,6 +130,32 @@ public class Robot extends TimedRobot {
         drive.gyroDrive(0.3, 0.0);
       } else {
         drive.gyroDrive(0.0, 0.0);
+      }*/
+
+
+       if (autotime.get() < 1.5) {
+        manipulator.shoot(1);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      } else if (autotime.get() < 3){
+         manipulator.intake(1.0);
+        manipulator.shoot(0.5);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+         if (pos >= 0.4) {
+        drive.gyroDrive(0.0, 0);
+      } else {
+         drive.gyroDrive(0.3, 0);
+       } 
+      } else if (autotime.get() < 5.0) {
+        if (manipulator.getNoteSensor()) {
+          manipulator.intake(0.375);
+        } else {
+          manipulator.intake(0.0);
+        }
+        manipulator.shoot(0.0);
+        manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
+        drive.gyroDrive(0.2, 62);
+      } else if (autotime.get() < 7.0) {
+        drive.gyroDrive(0.0, 30);
       }
 
     } else if ("MultiNote".equals(m_autoSelected)) {
@@ -151,18 +178,19 @@ public class Robot extends TimedRobot {
         }
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, 0.0);
+        if (pos >= 1.3) {
+        drive.gyroDrive(0.0, 0);
+      } else {
+         drive.gyroDrive(0.375, 0);
+       }
 
-      } else if (autotime.get() < 6.5) {
-        drive.gyroDrive(0.0, 0.0);
-
-      } else if (autotime.get() < 7.0) {
+      }  else if (autotime.get() < 7.0) {
         // Drive back
         manipulator.intake(0.0);
         manipulator.shoot(0.5);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(-0.45, 0.0);
-      } else if (autotime.get() < 10) {
+        drive.gyroDrive(-0.3, 0.0);
+      } else if (autotime.get() < 12) {
         // Drive back
         manipulator.intake(1.0);
         manipulator.shoot(0.5);
@@ -178,29 +206,36 @@ public class Robot extends TimedRobot {
 
     } else if ("SendIt".equals(m_autoSelected)) {
 
-      if (autotime.get() < 2) {
-        manipulator.shoot(0.5);
-        manipulator.armToPos(0.079);
-      } else if (autotime.get() < 4) {
+       if (autotime.get() < 2.0) {
+        // Lower arm
+        manipulator.shoot(1);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      } else if (autotime.get() < 4.0) {
+        // Shoot
         manipulator.intake(1.0);
         manipulator.shoot(0.5);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       } else if (autotime.get() < 5.5) {
+        // Drive, intake
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
+          manipulator.intake(0.3);
         } else {
           manipulator.intake(0.0);
         }
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, 0.0);
+        if (pos >= 1.5) {
+        drive.gyroDrive(0.0, 0);
+      } else {
+         drive.gyroDrive(0.375, 0);
+       }
       } else if (autotime.get() < 7.0) {
         manipulator.intake(0.0);
         manipulator.shoot(1.0);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
+        double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         manipulator.armToPos(shot_angle);
 
         var result = camera.getLatestResult();
@@ -223,7 +258,7 @@ public class Robot extends TimedRobot {
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
+        double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         manipulator.armToPos(shot_angle);
 
         var result = camera.getLatestResult();
@@ -242,25 +277,25 @@ public class Robot extends TimedRobot {
         }
       } else if (autotime.get() < 11.0) {
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.45);
+          manipulator.intake(0.375);
         } else {
           manipulator.intake(0.0);
         }
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.375, -90.0);
+        drive.gyroDrive(0.2, -90.0);
       } else if (autotime.get() < 12.0) {
         manipulator.intake(0.0);
         manipulator.shoot(0.3);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(0.0, -46.0);
+        drive.gyroDrive(0.0, -40.0);
       } else if (autotime.get() < 13.5) {
         manipulator.intake(0.0);
         manipulator.shoot(1.0);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
+        double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         manipulator.armToPos(shot_angle);
 
         var result = camera.getLatestResult();
@@ -277,13 +312,13 @@ public class Robot extends TimedRobot {
           }
           drive.move(0, -turnController.calculate(goalTarget, 0));
         }
-      } else if (autotime.get() < 15.0) {
+      } else if (autotime.get() < 14.5) {
         manipulator.intake(1.0);
         manipulator.shoot(1.0);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shot_angle = -0.00008 * Math.pow(ty, 2) + 0.00252 * ty + 0.4992;
+        double shot_angle =-0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         manipulator.armToPos(shot_angle);
         // manipulator.armToPos(0.024);
 
@@ -308,6 +343,54 @@ public class Robot extends TimedRobot {
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
       }
 
+      } else if ("leftMultiNote".equals(m_autoSelected)) {
+
+      if (autotime.get() < 2.0) {
+        // Lower arm
+        manipulator.shoot(1);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      } else if (autotime.get() < 4.0) {
+        // Shoot
+        manipulator.intake(1.0);
+        manipulator.shoot(0.5);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      } else if (autotime.get() < 5.5) {
+        // Drive
+        if (pos >= 0.3) {
+        drive.gyroDrive(0.0, 0);
+      } else {
+         drive.gyroDrive(0.375, 0);
+       }
+        } else if (autotime.get() < 7.5) {
+        if (manipulator.getNoteSensor()) {
+          manipulator.intake(0.45);
+        } else {
+          manipulator.intake(0.0);
+        }
+        manipulator.shoot(0.0);
+        manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
+        drive.gyroDrive(0.375, -90.0);
+
+      }  else if (autotime.get() < 8.5) {
+        // Drive back
+        manipulator.intake(0.0);
+        manipulator.shoot(0.5);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+        drive.gyroDrive(-0.3, 0.0);
+      } else if (autotime.get() < 15) {
+        // Drive back
+        manipulator.intake(1.0);
+        manipulator.shoot(0.5);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+        drive.gyroDrive(0.0, 0.0);
+      } else {
+        // Finally,
+        drive.move(0.0, 0.0); // Stop
+        manipulator.intake(0.0);
+        manipulator.shoot(0.0);
+        manipulator.armToPos(Manipulator.kARM_FENDER_POS);
+      }
+
     } else {
       drive.gyroDrive(0.25, 0.0);
     }
@@ -319,70 +402,63 @@ public class Robot extends TimedRobot {
     m_TargetID = m_IDchooser.getSelected();
     System.out.println("Target ID: " + m_TargetID);
 
+    drive.resetEncoders();
+
     drive.zeroGyro();
   }
 
   @Override
   public void teleopPeriodic() {
+
+    
      int ApriltagID = 0;
 
     Optional<Alliance> ally = DriverStation.getAlliance();
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
 
-      ApriltagID = 4;
+      ApriltagID = 5;
        
     }
     if (ally.get() == Alliance.Blue) {
 
-      ApriltagID = 7;
+      ApriltagID = 8;
         
     }
     }
     else {
-      ApriltagID = 7;
+      ApriltagID = 8;
     
       }
 
-    drive.m_drivetrain.feed();
-
-    if (m_driveController.getCrossButton()) {
-      drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward);
-    } else if (m_driveController.getTriangleButton()) {
-      drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse);
-    } else if (m_driveController.getCircleButton()) {
-      drive.sysIdDynamic(SysIdRoutine.Direction.kForward);
-    } else if (m_driveController.getSquareButton()) {
-      drive.sysIdDynamic(SysIdRoutine.Direction.kReverse);
-    }
-
+   
     // Drive
     double power = 0;
     double steering = 0;
 
     if (m_driveController.getR2Axis() > 0.1) {
-      power = m_driveController.getLeftY() * 1;
-      steering = m_driveController.getRightX() * 1;
-
-    } else {
       power = m_driveController.getLeftY() * 0.5;
       steering = m_driveController.getRightX() * 0.5;
+
+    } else {
+      power = m_driveController.getLeftY() * 1;
+      steering = m_driveController.getRightX() * 1;
     }
 
     if (m_driveController.getL2Axis() > 0.1) {
-      power = m_driveController.getLeftY() * 0.25;
-      steering = m_driveController.getRightX() * 0.25;
-
-    } else {
       power = m_driveController.getLeftY() * 0.5;
       steering = m_driveController.getRightX() * 0.5;
+
+    } else {
+      power = m_driveController.getLeftY() * 1;
+      steering = m_driveController.getRightX() * 1;
     }
 
-    if (Math.abs(power) < 0.1) {
+    if (Math.abs(power) < 0.15) {
       power = 0;
     }
 
-    if (Math.abs(steering) < 0.1) {
+    if (Math.abs(steering) < 0.15) {
       steering = 0;
     }
 
@@ -417,35 +493,18 @@ public class Robot extends TimedRobot {
       curr_arm_target = Manipulator.kARM_FENDER_POS;
     }
 
-    
 
-    /* Shooter */
-    if (m_manipController.getR2Axis() > 0.1) {
-      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
-        // if arm turned back farther than starting config
-        manipulator.shoot(0.25);
-      } else {
-        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
-        // read values periodically
-        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
-        double shotAngle =
-            -0.00000000562323 * Math.pow(ty, 2) + 0.0001606189982 * ty + 0.2199664090903;
-        SmartDashboard.putNumber("shotAngle", shotAngle);
-        // double FarAngle = 0; // Function with far shots
-        SmartDashboard.putNumber("PhotonY", ty);
-        // curr_arm_target = shotAngle;
-        // curr_arm_target = shotAngle;
-        // if (ty > 600) {
-        //  curr_arm_target = shotAngle;
-        // } else {
-        // curr_arm_target = FarAngle;
-        // }
+    SmartDashboard.putNumber("ApriltagID", ApriltagID);
+     
 
-        // post to smart dashboard periodically
-      }
-      var result = camera.getLatestResult();
+
+    if (m_driveController.getSquareButton()){
+
+    var result = camera.getLatestResult();
       // Put the ID you want to follow or prioritize
       double goalTarget = 0;
+
+      
 
       if (result.hasTargets()) {
         List<PhotonTrackedTarget> targets = result.getTargets();
@@ -457,10 +516,54 @@ public class Robot extends TimedRobot {
           }
         }
 
-        steering = -turnController.calculate(goalTarget, 0);
+        double Kp = 0.00567556; //0.00567556 Valores dados por Dios, gracias Dios :)
+        double error = goalTarget;
+        steering = Kp * error;
+
+        //steering = -turnController.calculate(goalTarget, 0);
         // double cheap = steering;
-        drive.move(power, steering);
+       drive.move(0, steering);
         SmartDashboard.putNumber("moveAngle", steering);
+        SmartDashboard.putNumber("GoalTarget", goalTarget);
+      }
+    }
+
+    
+
+    /* Shooter */
+    if (m_manipController.getR2Axis() > 0.1) {
+      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
+        // if arm turned back farther than starting config
+        manipulator.shoot(0.25);
+      } else {
+        
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+        // read values periodically
+        double ty = table.getEntry("targetPixelsY").getDouble(0.0);
+        double shotAngle =  -0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
+        SmartDashboard.putNumber("shotAngle", shotAngle);
+         double FarAngle =  -0.0000028840396 * Math.pow(ty, 2) + 0.0027452837529 * ty - 0.5193911599854;
+
+        // double FarAngle = 0; // Function with far shots
+        SmartDashboard.putNumber("PhotonY", ty);
+
+        if (ty < 10){
+          SmartDashboard.putNumber("off", 1);
+
+        } else {
+          SmartDashboard.putNumber("off", 2);
+           if (ty > 420) {
+       curr_arm_target = FarAngle;
+       SmartDashboard.putNumber("FarAngle", FarAngle);
+        } else {
+        curr_arm_target = shotAngle;
+        }
+
+        }
+      
+       
+
+         
       }
     }
 

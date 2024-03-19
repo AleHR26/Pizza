@@ -29,8 +29,7 @@ public class Constants {
     /** How far from the target we want to be */
     static final double GOAL_RANGE_METERS = Units.feetToMeters(2);
     
-    // TODO: Tune the PID.
-    public static final double ANGULAR_P = 0.0095;
+    public static final double ANGULAR_P = 0.00567556; //0.0095
     public static final double ANGULAR_D = 0.0;
 
     public static final Timer autotime = new Timer();
