@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.Rev2mDistanceSensor;
 import com.revrobotics.Rev2mDistanceSensor.Port;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -21,6 +22,9 @@ public class Manipulator {
 
   private CANSparkMax shooterMotorA = new CANSparkMax(7, MotorType.kBrushless);
   private CANSparkMax shooterMotorB = new CANSparkMax(8, MotorType.kBrushless);
+
+  RelativeEncoder aEncoder = shooterMotorA.getEncoder();
+  RelativeEncoder bEncoder = shooterMotorB.getEncoder();
 
   public static Rev2mDistanceSensor noteSensor = new Rev2mDistanceSensor(Port.kOnboard);
   private CANSparkMax intakeMotor = new CANSparkMax(9, MotorType.kBrushless);
@@ -54,6 +58,38 @@ public class Manipulator {
     shooterMotorB.setIdleMode(IdleMode.kBrake);
 
     noteSensor.setAutomaticMode(true);
+
+    aEncoder.setPosition(0); 
+    bEncoder.setPosition(0); 
+
+    resetShooters();
+  }
+
+  public void resetShooters() {
+    aEncoder.setPosition(0);
+    bEncoder.setPosition(0);
+  }
+
+  public double getaEncoderPosition() {
+    return aEncoder.getPosition();
+  }
+
+   public double getbEncoderPosition() {
+    return bEncoder.getPosition();
+  }
+
+  public double getShootersPosition(){
+   double position = (aEncoder.getPosition() +bEncoder.getPosition())/2;
+   return position;
+
+  }
+
+  public double getShooterAVelocity() {
+    return aEncoder.getVelocity();
+  }
+
+  public double getShooterBVelocity() {
+    return bEncoder.getVelocity();
   }
 
   public static Manipulator getInstance() {
@@ -94,7 +130,7 @@ public class Manipulator {
   }
 
   public void shoot(double power) {
-    shooterMotorA.set(-power);
+    shooterMotorA.set(-power); //setVoltage(12.0 * rpm / 5676.0 + 12.0 * .0001 * (rpm - getShooterAVelocity()));
     shooterMotorB.set(-power); 
   }
 

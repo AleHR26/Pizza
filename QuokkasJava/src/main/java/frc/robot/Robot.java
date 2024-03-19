@@ -70,6 +70,7 @@ public class Robot extends TimedRobot {
     m_manipController = new PS5Controller(PS5ControllerPorts.MANIPULATOR_PORT);
 
     camera = new PhotonCamera("Camera");
+    manipulator.resetShooters();
     drive.zeroGyro();
   }
 
@@ -77,9 +78,10 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     SmartDashboard.putNumber("Arm enc", manipulator.getArmEnc());
     SmartDashboard.putNumber("D-Sensor Range", manipulator.getRange());
+    SmartDashboard.putNumber("Shoot VelocityA", manipulator.getShooterAVelocity());
+    SmartDashboard.putNumber("Shoot VelocityB", manipulator.getShooterBVelocity());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("Encoders", drive.getEncodersPosition());
-   
   }
 
   @Override
@@ -91,25 +93,32 @@ public class Robot extends TimedRobot {
     
     drive.zeroGyro();
     drive.resetEncoders();
+    manipulator.resetShooters();
     autotime.reset();
+    
   }
 
   @Override
   public void autonomousPeriodic() {
     
     int ApriltagID = 0;
+    int direction = 0;
 
     Optional<Alliance> ally = DriverStation.getAlliance();
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
 
       ApriltagID = 5;
-       
+
+      direction = -1; //Ajustar este valor si va a la direccion incorrecta con 1
+      
     }
     if (ally.get() == Alliance.Blue) {
 
       ApriltagID = 8;
-        
+
+      direction = 1; //Ajustar este valor si va a la direccion incorrecta con -1
+      
     }
     }
     else {
@@ -259,12 +268,12 @@ public class Robot extends TimedRobot {
         }
         manipulator.shoot(0.0);
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
-        drive.gyroDrive(0.2, -90.0);
+        drive.gyroDrive(0.2, -90.0*direction);
       } else if (autotime.get() < 12.0) {
         manipulator.intake(0.0);
         manipulator.shoot(0.3);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(0.0, -40.0);
+        drive.gyroDrive(0.0, -40.0*direction);
       } else if (autotime.get() < 13.5) {
         manipulator.intake(0.0);
         manipulator.shoot(1.0);
@@ -381,7 +390,7 @@ public class Robot extends TimedRobot {
     System.out.println("Target ID: " + m_TargetID);
 
     drive.resetEncoders();
-
+    manipulator.resetShooters();
     drive.zeroGyro();
   }
 
