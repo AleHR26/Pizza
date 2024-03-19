@@ -187,6 +187,7 @@ public class Drive extends SubsystemBase {
     R2.set(rPower);
     SmartDashboard.putNumber("lpower", lPower);
     SmartDashboard.putNumber("rpower", rPower);
+    
   }
 
   // Drive with the gyro
