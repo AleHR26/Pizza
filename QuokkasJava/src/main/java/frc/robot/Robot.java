@@ -26,7 +26,7 @@ import java.util.Optional;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot { 
 
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private final SendableChooser<String> m_IDchooser = new SendableChooser<>();
@@ -660,7 +660,18 @@ public class Robot extends TimedRobot {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
       } else {
-        
+
+      var result = camera.getLatestResult();
+      // Put the ID you want to follow or prioritize
+      
+
+      
+
+      if (result.hasTargets()) {
+        List<PhotonTrackedTarget> targets = result.getTargets();
+      
+        for (int i = 0; i < targets.size(); i++) {
+          if (targets.get(i).getFiducialId() == ApriltagID){
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         // read values periodically
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
@@ -683,7 +694,16 @@ public class Robot extends TimedRobot {
         curr_arm_target = shotAngle;
         }
 
+            
+          }
         }
+
+        
+        }
+
+      }
+        
+       
       }
     }
 
