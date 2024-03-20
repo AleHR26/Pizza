@@ -46,12 +46,34 @@ public class Robot extends TimedRobot {
 
   private Timer autotime = PhotonVisionConstants.autotime;
 
+  String dyslexic = "leftMultinote";
+  String dyslexic1  ="rightMultinote";
+
   // PID constants should be tuned per robot
   PIDController turnController =
       new PIDController(PhotonVisionConstants.ANGULAR_P, 0, PhotonVisionConstants.ANGULAR_D);
 
   @Override
   public void robotInit() {
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+    if (ally.get() == Alliance.Red) {
+
+     dyslexic1 = "leftMultinote";
+     dyslexic  ="rightMultinote";
+      
+      
+     
+    }
+    if (ally.get() == Alliance.Blue) {
+
+     dyslexic = "leftMultinote";
+     dyslexic1 ="rightMultinote";
+      
+      
+      
+    }
+    }
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
     curr_arm_target = Manipulator.kARM_START_POS; 
@@ -62,8 +84,8 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("MultiNote", "MultiNote");
     m_chooser.addOption("leftMultiNote", "leftMultiNote");
     m_chooser.addOption("SendIt", "SendIt");
-    m_chooser.addOption("leftMultiNote", "leftMultiNote");
-    m_chooser.addOption("rightMultiNote", "rightMultiNote");
+    m_chooser.addOption(dyslexic, dyslexic);
+    m_chooser.addOption(dyslexic1, dyslexic);
 
     SmartDashboard.putData("Auto Modes", m_chooser);
 
