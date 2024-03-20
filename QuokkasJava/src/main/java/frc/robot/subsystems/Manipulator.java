@@ -134,12 +134,17 @@ public class Manipulator {
     shooterMotorB.set(-power); 
   }
 
+  public void shootVoltage(double rpm) {
+    shooterMotorA.setVoltage(12.0 * -rpm / 5851.427 + 12.0 * .0001 * (-rpm - getShooterAVelocity())); //setVoltage(12.0 * rpm / 5676.0 + 12.0 * .0001 * (rpm - getShooterAVelocity()));
+    shooterMotorB.setVoltage(12.0 * -rpm / 5754.28 + 12.0 * .0001 * (-rpm - getShooterAVelocity()));
+  }
+
   public double getRange() {
     return noteSensor.GetRange();
   }
 
   public boolean getNoteSensor() {
-    if (noteSensor.getRange() > 4) {
+    if (noteSensor.getRange() > 4.2) {
       return true;
     } else {
       return false;

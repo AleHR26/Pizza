@@ -83,6 +83,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Shoot VelocityB", manipulator.getShooterBVelocity());
     SmartDashboard.putNumber("Gyro Angle", drive.getGyroAngle());
     SmartDashboard.putNumber("Encoders", drive.getEncodersPosition());
+    SmartDashboard.putNumber("shooterA Encoder pos", manipulator.getaEncoderPosition());
+    SmartDashboard.putNumber("shooterBEncoder pos", manipulator.getbEncoderPosition());
+
+    
   }
 
   @Override
@@ -111,14 +115,14 @@ public class Robot extends TimedRobot {
       
       ApriltagID = 3;
 
-      direction = -1; //Ajustar este valor si va a la direccion incorrecta con 1
+      direction = -1;
       
     }
     if (ally.get() == Alliance.Blue) {
 
       ApriltagID = 8;
 
-      direction = 1; //Ajustar este valor si va a la direccion incorrecta con -1
+      direction = 1; 
       
     }
     }
@@ -206,7 +210,7 @@ public class Robot extends TimedRobot {
       } else if (autotime.get() < 5.5) {
         // Drive, intake
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.3);
+          manipulator.intake(0.375);
         } else {
           manipulator.intake(0.0);
         }
@@ -242,7 +246,7 @@ public class Robot extends TimedRobot {
         }
       } else if (autotime.get() < 9.0) {
         manipulator.intake(1.0);
-        manipulator.shoot(1.0);
+        manipulator.shoot(0.5);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
@@ -276,7 +280,7 @@ public class Robot extends TimedRobot {
         manipulator.intake(0.0);
         manipulator.shoot(0.3);
         manipulator.armToPos(Manipulator.kARM_FENDER_POS);
-        drive.gyroDrive(0.0, -40.0*direction);
+        drive.gyroDrive(0.0, -37.0*direction);
       } else if (autotime.get() < 13.5) {
         manipulator.intake(0.0);
         manipulator.shoot(1.0);
@@ -302,7 +306,7 @@ public class Robot extends TimedRobot {
         }
       } else if (autotime.get() < 14.5) {
         manipulator.intake(1.0);
-        manipulator.shoot(1.0);
+        manipulator.shoot(0.5);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
@@ -331,6 +335,7 @@ public class Robot extends TimedRobot {
       }
 
       /* LEFT MULTINOTE */
+      /* ES LEFT DESDE EL PUNTO DE VISTA DEL BLUE ALLIANCE DRIVE STATION HACIA ENFRENTE */
       } else if ("leftMultiNote".equals(m_autoSelected)) {
 
         if (autotime.get() < 1.5) {
@@ -345,7 +350,7 @@ public class Robot extends TimedRobot {
       } else {
          drive.gyroDrive(0.3, 0);
        } 
-      } else if (autotime.get() < 5.0) {
+      } else if (autotime.get() < 4.9) {
         if (manipulator.getNoteSensor()) {
           manipulator.intake(0.375);
         } else {
@@ -355,6 +360,7 @@ public class Robot extends TimedRobot {
         manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
         drive.gyroDrive(0.2, 62*direction);
       } else if (autotime.get() < 7.0) {
+        manipulator.intake(0.0);
         drive.gyroDrive(0.0, 30*direction);
       } else if  (autotime.get() < 10.0) {
 
@@ -380,9 +386,9 @@ public class Robot extends TimedRobot {
           }
           drive.move(0, -turnController.calculate(goalTarget, 0));
         }
-      } else if (autotime.get() < 13) {
+      } else if (autotime.get() < 13.5) {
         manipulator.intake(1.0);
-        manipulator.shoot(1.0);
+        manipulator.shoot(0.5);
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
         double ty = table.getEntry("targetPixelsY").getDouble(0.0);
@@ -403,9 +409,13 @@ public class Robot extends TimedRobot {
             }
           }
           drive.move(0, -turnController.calculate(goalTarget, 0));
-       } 
+       } else if (autotime.get() < 15) {
+        manipulator.intake(0.0);
+        manipulator.shoot(0.0); 
+       }
    } 
    /* RIGHT MULTINOTE */
+   /* ES RIGHT DESDE EL PUNTO DE VISTA DEL BLUE ALLIANCE DRIVE STATION HACIA ENFRENTE */
   } else if ("rightMultiNote".equals(m_autoSelected)) {
 
     if (autotime.get() < 1.5) {
@@ -422,7 +432,7 @@ public class Robot extends TimedRobot {
    } 
   } else if (autotime.get() < 5.0) {
     if (manipulator.getNoteSensor()) {
-      manipulator.intake(0.375);
+      manipulator.intake(0.3);
     } else {
       manipulator.intake(0.0);
     }
@@ -430,6 +440,7 @@ public class Robot extends TimedRobot {
     manipulator.armToPos(Manipulator.kARM_FLOOR_POS);
     drive.gyroDrive(0.2, -62*direction);
   } else if (autotime.get() < 7.0) {
+    manipulator.intake(0.0);
     drive.gyroDrive(0.0, -30*direction);
   } else if  (autotime.get() < 10.0) {
 
@@ -455,9 +466,9 @@ public class Robot extends TimedRobot {
       }
       drive.move(0, -turnController.calculate(goalTarget, 0));
     }
-  } else if (autotime.get() < 13) {
+  } else if (autotime.get() < 13.5) {
     manipulator.intake(1.0);
-    manipulator.shoot(1.0);
+    manipulator.shoot(0.5);
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
     double ty = table.getEntry("targetPixelsY").getDouble(0.0);
@@ -479,7 +490,10 @@ public class Robot extends TimedRobot {
       }
       drive.move(0, -turnController.calculate(goalTarget, 0));
    } 
-} 
+  } else if (autotime.get() < 15) {
+    manipulator.intake(0.0);
+    manipulator.shoot(0.0); 
+  } 
   } else {
   drive.gyroDrive(0.2, 0.0);
  }
@@ -499,7 +513,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-
+   
     
      int ApriltagID = 0;
 
@@ -526,13 +540,11 @@ public class Robot extends TimedRobot {
     double power = 0;
     double steering = 0;
 
-    if (m_driveController.getR2Axis() > 0.1) {
-      power = m_driveController.getLeftY() * 0.5;
-      steering = m_driveController.getRightX() * 0.5;
+    if (m_driveController.getR2Axis() > 0.15) {
+     // manipulator.shootVoltage(400);
 
     } else {
-      power = m_driveController.getLeftY() * 1;
-      steering = m_driveController.getRightX() * 1;
+      //manipulator.shootVoltage(0);
     }
 
     if (m_driveController.getL2Axis() > 0.1) {
@@ -672,7 +684,7 @@ public class Robot extends TimedRobot {
         manipulator.intake(1.0);
       }
     } else {
-      manipulator.shoot(0.0);
+      manipulator.shoot(0.1);
     }
 
     /*Arm manual control*/
