@@ -55,25 +55,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    Optional<Alliance> ally = DriverStation.getAlliance();
-    if (ally.isPresent()) {
-    if (ally.get() == Alliance.Red) {
-
-     dyslexic1 = "leftMultinote";
-     dyslexic  ="rightMultinote";
-      
-      
-     
-    }
-    if (ally.get() == Alliance.Blue) {
-
-     dyslexic = "leftMultinote";
-     dyslexic1 ="rightMultinote";
-      
-      
-      
-    }
-    }
+    
     drive = Drive.getInstance();
     manipulator = Manipulator.getInstance();
     curr_arm_target = Manipulator.kARM_START_POS; 
@@ -84,7 +66,7 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("MultiNote", "MultiNote");
     m_chooser.addOption("leftMultiNote", "leftMultiNote");
     m_chooser.addOption("SendIt", "SendIt");
-    m_chooser.addOption(dyslexic, dyslexic);
+    m_chooser.addOption("rightMultiNote", "rightMultinote");
     m_chooser.addOption(dyslexic1, dyslexic);
 
     SmartDashboard.putData("Auto Modes", m_chooser);
@@ -122,6 +104,9 @@ public class Robot extends TimedRobot {
     drive.resetEncoders();
     manipulator.resetShooters();
     autotime.reset();
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision/Camera");
+        double ty = table.getEntry("YPixels").getDouble(0.0);
+        SmartDashboard.putNumber("YValue", ty);
     
   }
 
@@ -135,7 +120,7 @@ public class Robot extends TimedRobot {
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
       
-      ApriltagID = 3;
+      ApriltagID = 4;
 
       direction = -1;
       
@@ -185,7 +170,7 @@ public class Robot extends TimedRobot {
       } else if (autotime.get() < 5.5) {
         // Drive, intake
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
+          manipulator.intake(0.5);
         } else {
           manipulator.intake(0.0);
         }
@@ -232,7 +217,7 @@ public class Robot extends TimedRobot {
       } else if (autotime.get() < 5.5) {
         // Drive, intake
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
+          manipulator.intake(0.5);
         } else {
           manipulator.intake(0.0);
         }
@@ -291,7 +276,7 @@ public class Robot extends TimedRobot {
         }
       } else if (autotime.get() < 11.0) {
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
+          manipulator.intake(0.5);
         } else {
           manipulator.intake(0.0);
         }
@@ -374,7 +359,7 @@ public class Robot extends TimedRobot {
        } 
       } else if (autotime.get() < 4.9) {
         if (manipulator.getNoteSensor()) {
-          manipulator.intake(0.375);
+          manipulator.intake(0.5);
         } else {
           manipulator.intake(0.0);
         }
@@ -454,7 +439,7 @@ public class Robot extends TimedRobot {
    } 
   } else if (autotime.get() < 5.0) {
     if (manipulator.getNoteSensor()) {
-      manipulator.intake(0.3);
+      manipulator.intake(0.5);
     } else {
       manipulator.intake(0.0);
     }
@@ -543,7 +528,7 @@ public class Robot extends TimedRobot {
     if (ally.isPresent()) {
     if (ally.get() == Alliance.Red) {
 
-      ApriltagID = 5;
+      ApriltagID = 4;
        
     }
     if (ally.get() == Alliance.Blue) {
@@ -562,12 +547,7 @@ public class Robot extends TimedRobot {
     double power = 0;
     double steering = 0;
 
-    if (m_driveController.getR2Axis() > 0.15) {
-     // manipulator.shootVoltage(400);
-
-    } else {
-      //manipulator.shootVoltage(0);
-    }
+   
 
     if (m_driveController.getL2Axis() > 0.1) {
       power = m_driveController.getLeftY() * 0.5;
@@ -591,7 +571,7 @@ public class Robot extends TimedRobot {
     /* Intake */
     if (m_manipController.getR1Button() && manipulator.getNoteSensor()) {
       // If pressing intake button, and the NOTE is not int the intake
-      manipulator.intake(0.375);
+      manipulator.intake(0.55);
       if (m_manipController.getR2Axis() < 0.5) {
         curr_arm_target = Manipulator.kARM_FLOOR_POS;
       }
@@ -653,8 +633,8 @@ public class Robot extends TimedRobot {
     }
 
     
-
     /* Shooter */
+    
     if (m_manipController.getR2Axis() > 0.1) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         // if arm turned back farther than starting config
@@ -667,30 +647,38 @@ public class Robot extends TimedRobot {
         double shotAngle =  -0.0000002832496 * Math.pow(ty, 2) + 0.0003691787531 * ty + 0.0175008871005;
         SmartDashboard.putNumber("shotAngle", shotAngle);
          double FarAngle =  -0.0000028840396 * Math.pow(ty, 2) + 0.0027452837529 * ty - 0.5193911599854;
+        double realmid = -0.0000336920524  * Math.pow(ty, 2) + 0.0219774192972 * ty - 3.4322194005322;
 
         // double FarAngle = 0; // Function with far shots
+        //TODO: Acordarse de colocar el && y calibrar 
         SmartDashboard.putNumber("PhotonY", ty);
-
         if (ty < 10){
           SmartDashboard.putNumber("off", 1);
-
+        } else if (ty > 300) {
+          SmartDashboard.putNumber("FarAngle", FarAngle);
+          curr_arm_target = FarAngle;
         } else {
-          SmartDashboard.putNumber("off", 2);
-           if (ty > 420) {
-       curr_arm_target = FarAngle;
-       SmartDashboard.putNumber("FarAngle", FarAngle);
-        } else {
-        curr_arm_target = shotAngle;
+          SmartDashboard.putNumber("You are in mid", 0);
+          curr_arm_target = shotAngle;
         }
 
         }
       }
-    }
 
     if (m_manipController.getL2Axis() > 0.1) {
       manipulator.intake(1.0);
     }
 
+    if (m_manipController.getRightY() > 0.5) {
+      // if arm turned back farther than starting config, score AMP
+      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
+        manipulator.intake(1.0);
+        manipulator.shoot(0.5);
+      } else {
+        // High goal shooting
+        manipulator.shoot((m_manipController.getRightY() - 0.5) * 2);
+      }
+    }
     if (m_manipController.getR2Axis() > 0.5) {
       // if arm turned back farther than starting config, score AMP
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
@@ -706,7 +694,7 @@ public class Robot extends TimedRobot {
         manipulator.intake(1.0);
       }
     } else {
-      manipulator.shoot(0.1);
+      manipulator.shoot(0.0);
     }
 
     /*Arm manual control*/
