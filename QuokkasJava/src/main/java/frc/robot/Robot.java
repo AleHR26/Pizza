@@ -533,12 +533,12 @@ public class Robot extends TimedRobot {
     }
     if (ally.get() == Alliance.Blue) {
 
-      ApriltagID = 8;
+      ApriltagID = 7;
         
     }
     }
     else {
-      ApriltagID = 8;
+      ApriltagID = 7;
     
       }
 
@@ -635,7 +635,7 @@ public class Robot extends TimedRobot {
     
     /* Shooter */
     
-    if (m_manipController.getR2Axis() > 0.1) {
+    if (m_manipController.getCircleButton()) {
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
         // if arm turned back farther than starting config
         manipulator.shoot(0.25);
@@ -669,16 +669,7 @@ public class Robot extends TimedRobot {
       manipulator.intake(1.0);
     }
 
-    if (m_manipController.getRightY() > 0.5) {
-      // if arm turned back farther than starting config, score AMP
-      if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
-        manipulator.intake(1.0);
-        manipulator.shoot(0.5);
-      } else {
-        // High goal shooting
-        manipulator.shoot((m_manipController.getRightY() - 0.5) * 2);
-      }
-    }
+  
     if (m_manipController.getR2Axis() > 0.5) {
       // if arm turned back farther than starting config, score AMP
       if (manipulator.getArmEnc() > Manipulator.kARM_START_POS) {
