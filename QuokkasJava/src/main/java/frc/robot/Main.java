@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.Console;
+
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Util.AutoArm;
 import frc.robot.Util.AutoArm.AprilTagSpecs;
@@ -25,9 +27,19 @@ public final class Main {
     // RobotBase.startRobot(Robot::new);
 
     AutoArm.Init();
-    double xDistance = 320;
+    double[] distances = {
+      333,248,198,235,58,134,112,209,216
+    };
+    for (double d : distances) {
+    double xDistance = d;
     AprilTagSpecs ATS = AutoArm.Speaker_ATS;
     Double goalArmAngle = AutoArm.GetShootAngleTowardsTarget(xDistance, ATS);
-    //El Resultado del Goal Angle es para aplicar en el brazo desde atras hacia el frente.
+
+    System.out.println("Encoder: "+((goalArmAngle*0.266)/90));
+    //El Resultado del Goal Angle es para aplicar en el brazo desde atras hacia el frente.  
+  
+    
   }
+}
+
 }

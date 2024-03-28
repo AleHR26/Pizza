@@ -91,7 +91,7 @@ public class Physics {
                     return armAngle; // Return the angle at which the raycast hits the target
                 }
                 
-                System.out.println("Raycast at: "+origin.toString()+", ArmAngle: "+armAngle+", MuzzleAngle: "+muzzleAngle+"} did not intersect point!");
+                // System.out.println("Raycast at: "+origin.toString()+", ArmAngle: "+armAngle+", MuzzleAngle: "+muzzleAngle+"} did not intersect point!");
                 // Increment the angle for the next iteration
                 armAngle += increment;
             }
